@@ -1,0 +1,154 @@
+// ==============================================
+// Office Documents Manager By Dear Er
+// Database Schema
+// ==============================================
+// Yo file le hamro sabai data ko "structure" define garxa.
+// Prisma le yehi file herera database ma table banaunxa.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")       // Normal connection (pooled, app le use garne)
+  directUrl = env("DIRECT_URL")         // Direct connection (migration/schema change ko lagi)
+}
+
+// ------------------------------------------------
+// COMPANY - Har company ko basic profile
+// ------------------------------------------------
+model Company {
+  id                  String   @id @default(cuid())
+  name                String                              // e.g. "BI Engineering Consultancy"
+  establishmentYearBS String                               // e.g. "2070" - fiscal year list auto-generate garna yo chahinxa
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relations - yo company sanga sambandhit documents haru
+  documents         CompanyDocument[]
+  taxClearances     TaxClearance[]
+  experienceLetters ExperienceLetter[]
+}
+
+// ------------------------------------------------
+// DOCUMENT SECTION TYPE - Dynamic section types
+// (Registration, VAT, + admin le thapeko custom sections)
+// ------------------------------------------------
+model DocumentSectionType {
+  id        String   @id @default(cuid())
+  key       String   @unique                              // e.g. "registration", "vat", "renewal_certificate"
+  label     String                                          // e.g. "Company Registration Certificate"
+  isDefault Boolean  @default(false)                        // true for Registration & VAT (system defaults)
+  createdAt DateTime @default(now())
+
+  documents CompanyDocument[]
+}
+
+// ------------------------------------------------
+// COMPANY DOCUMENT - Static documents (Registration, VAT, custom)
+// Ek company ko ek section type ma euta matra active file huncha (replace huncha, history hoina)
+// ------------------------------------------------
+model CompanyDocument {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  sectionTypeId  String
+  sectionType    DocumentSectionType @relation(fields: [sectionTypeId], references: [id])
+
+  fileUrl        String                                     // Vercel Blob URL (PDF, already converted+compressed)
+  backupUrl      String?                                    // Google Drive backup URL
+  fileName       String                                     // original filename shown to user
+  fileSizeBytes  Int?
+
+  isDeleted      Boolean  @default(false)                   // soft delete -> trash
+  deletedAt      DateTime?                                  // used for 30-day auto-purge
+
+  uploadedAt     DateTime @default(now())
+
+  @@unique([companyId, sectionTypeId])                      // one active doc per section per company
+}
+
+// ------------------------------------------------
+// TAX CLEARANCE - Dynamic, yearly (multiple per company)
+// ------------------------------------------------
+model TaxClearance {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  fiscalYear     String                                     // e.g. "2083-84"
+  fileUrl        String
+  backupUrl      String?
+  fileName       String
+  fileSizeBytes  Int?
+
+  isLatest       Boolean  @default(false)                   // auto-marked true for most recent upload
+
+  isDeleted      Boolean  @default(false)
+  deletedAt      DateTime?
+
+  uploadedAt     DateTime @default(now())
+
+  @@unique([companyId, fiscalYear])
+}
+
+// ------------------------------------------------
+// SECTOR - Dynamic categories (Road, Bridge, Structure, Water Supply, Sanitation + admin-added)
+// ------------------------------------------------
+model Sector {
+  id        String   @id @default(cuid())
+  name      String   @unique                                // e.g. "Road", "Bridge", "Irrigation"
+  createdAt DateTime @default(now())
+
+  experienceLetters ExperienceLetter[]
+}
+
+// ------------------------------------------------
+// EXPERIENCE LETTER - Dynamic (multiple per company)
+// Filterable by fiscal year, sector, and province
+// ------------------------------------------------
+model ExperienceLetter {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  fiscalYear     String                                     // e.g. "2083-84"
+
+  sectorId       String
+  sector         Sector   @relation(fields: [sectorId], references: [id])
+
+  province       Province
+
+  fileUrl        String
+  backupUrl      String?
+  fileName       String
+  fileSizeBytes  Int?
+
+  isDeleted      Boolean  @default(false)
+  deletedAt      DateTime?
+
+  uploadedAt     DateTime @default(now())
+}
+
+// Nepal's 7 provinces
+enum Province {
+  KOSHI
+  MADHESH
+  BAGMATI
+  GANDAKI
+  LUMBINI
+  KARNALI
+  SUDURPASHCHIM
+}
+
+// ------------------------------------------------
+// MERGE LOG - simple record of merged/downloaded PDFs (no user tracking, just history)
+// ------------------------------------------------
+model MergeLog {
+  id             String   @id @default(cuid())
+  companyId      String
+  outputFileName String
+  createdAt      DateTime @default(now())
+}
