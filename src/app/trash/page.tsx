@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import TrashClient from "@/components/TrashClient";
 import AppFooter from "@/components/AppFooter";
 
+export const dynamic = "force-dynamic";
+
 export default async function TrashPage() {
   const [staticDocs, taxClearances, experienceLetters] = await Promise.all([
     prisma.companyDocument.findMany({

@@ -4,6 +4,10 @@ import { getCurrentFiscalYear } from "@/lib/fiscalYear";
 import AppFooter from "@/components/AppFooter";
 import LogoutButton from "@/components/LogoutButton";
 
+// Yo page login-protected ra database-driven ho, teसैले build-time ma
+// static prerender nagari, harek request ma live data fetch garne banaउने
+export const dynamic = "force-dynamic";
+
 interface CompanyWithLatestTax {
   id: string;
   name: string;

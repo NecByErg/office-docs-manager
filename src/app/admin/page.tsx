@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import AdminClient from "@/components/AdminClient";
 import AppFooter from "@/components/AppFooter";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPage() {
   const [companies, sectionTypes, sectors] = await Promise.all([
     prisma.company.findMany({ orderBy: { name: "asc" } }),

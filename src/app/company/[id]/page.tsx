@@ -4,6 +4,8 @@ import { generateFiscalYears } from "@/lib/fiscalYear";
 import CompanyDetailClient from "@/components/CompanyDetailClient";
 import AppFooter from "@/components/AppFooter";
 
+export const dynamic = "force-dynamic";
+
 export default async function CompanyDetailPage({
   params,
 }: {
