@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { getCurrentFiscalYear } from "@/lib/fiscalYear";
+import { getExpectedLatestTaxClearanceFY } from "@/lib/fiscalYear";
 import AppFooter from "@/components/AppFooter";
 import LogoutButton from "@/components/LogoutButton";
 
@@ -28,12 +28,12 @@ export default async function DashboardPage() {
     },
   });
 
-  const currentFiscalYear = getCurrentFiscalYear();
+  const expectedLatestFY = getExpectedLatestTaxClearanceFY();
 
   // Kun company ko tax clearance purano vayo (current fiscal year ko naam bhaisakena) teो pattaa lagaune
   const expiredCompanies = companies.filter((c: CompanyWithLatestTax) => {
     const latest = c.taxClearances[0];
-    return !latest || latest.fiscalYear !== currentFiscalYear;
+    return !latest || latest.fiscalYear !== expectedLatestFY;
   });
 
   return (
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {companies.map((company: CompanyWithLatestTax) => {
               const latest = company.taxClearances[0];
-              const isUpToDate = latest && latest.fiscalYear === currentFiscalYear;
+              const isUpToDate = latest && latest.fiscalYear === expectedLatestFY;
 
               return (
                 <Link

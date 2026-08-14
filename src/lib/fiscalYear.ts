@@ -52,3 +52,14 @@ export function getCurrentFiscalYear(): string {
   const nextYearShort = (CURRENT_BS_YEAR + 1).toString().slice(-2);
   return `${CURRENT_BS_YEAR}-${nextYearShort}`;
 }
+
+// Nepal ma tax clearance kunai fiscal year sakisake pachi matra paइन्छ
+// (jasто barsha chaliraheko bela teही barsha ko clearance paइदैन).
+// Teसैले "latest" tax clearance vaneko aहिले chaliraheko FY haइन,
+// teो bhanda pahileको (already sakisakेको) FY ho।
+// Example: aहिले 2083-84 chaliराheko bhaye, expected latest clearance = "2082-83"
+export function getExpectedLatestTaxClearanceFY(): string {
+  const previousYear = CURRENT_BS_YEAR - 1;
+  const nextYearShort = CURRENT_BS_YEAR.toString().slice(-2);
+  return `${previousYear}-${nextYearShort}`;
+}
