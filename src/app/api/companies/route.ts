@@ -1,42 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
-// GET - sabai company list dine (dashboard ko lagi)
-export async function GET() {
-  const companies = await prisma.company.findMany({
-    orderBy: { name: "asc" },
+// GET - euta company ko sabai detail (documents, tax clearance, experience letters sabai)
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+
+  const company = await prisma.company.findUnique({
+    where: { id },
     include: {
+      documents: {
+        where: { isDeleted: false },
+        include: { sectionType: true },
+      },
       taxClearances: {
         where: { isDeleted: false },
         orderBy: { fiscalYear: "desc" },
-        take: 1, // latest tax clearance matra chahinxa alert check ko lagi
+      },
+      experienceLetters: {
+        where: { isDeleted: false },
+        include: { sector: true },
+        orderBy: { uploadedAt: "desc" },
       },
     },
   });
 
-  return NextResponse.json({ companies });
+  if (!company) {
+    return NextResponse.json({ error: "Company not found" }, { status: 404 });
+  }
+
+  return NextResponse.json({ company });
 }
 
-// POST - naya company add garne (admin panel bata)
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json();
-    const { name, establishmentYearBS } = body;
-
-    if (!name || !establishmentYearBS) {
-      return NextResponse.json(
-        { error: "Company name and establishment year are required" },
-        { status: 400 }
-      );
-    }
-
-    const company = await prisma.company.create({
-      data: { name, establishmentYearBS },
-    });
-
-    return NextResponse.json({ company }, { status: 201 });
-  } catch (error) {
-    console.error("Create company error:", error);
-    return NextResponse.json({ error: "Failed to create company" }, { status: 500 });
-  }
+// DELETE - company purai delete garne (admin matra, PIN check upstream ma huन्छ)
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  await prisma.company.delete({ where: { id } });
+  return NextResponse.json({ success: true });
 }

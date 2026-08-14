@@ -8,6 +8,7 @@ import StaticDocumentsSection from "./StaticDocumentsSection";
 import TaxClearanceSection from "./TaxClearanceSection";
 import ExperienceLettersSection from "./ExperienceLettersSection";
 import MergeDownloadBar from "./MergeDownloadBar";
+import CompanyLogo from "./CompanyLogo";
 
 interface Props {
   company: Company;
@@ -57,8 +58,13 @@ export default function CompanyDetailClient({
           <Link href="/dashboard" className="text-xs text-gray-500 hover:underline">
             ← Back to Dashboard
           </Link>
-          <h1 className="text-lg font-semibold text-gray-900 mt-1">{company.name}</h1>
-          <p className="text-xs text-gray-500">Established {company.establishmentYearBS} B.S.</p>
+          <div className="flex items-center gap-4 mt-2">
+            <CompanyLogo companyId={company.id} companyName={company.name} logoUrl={company.logoUrl} />
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900">{company.name}</h1>
+              <p className="text-xs text-gray-500">Established {company.establishmentYearBS} B.S.</p>
+            </div>
+          </div>
         </div>
       </header>
 

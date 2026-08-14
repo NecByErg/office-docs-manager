@@ -12,6 +12,7 @@ interface CompanyWithLatestTax {
   id: string;
   name: string;
   establishmentYearBS: string;
+  logoUrl?: string | null;
   taxClearances: { fiscalYear: string }[];
 }
 
@@ -90,10 +91,26 @@ export default async function DashboardPage() {
                   href={`/company/${company.id}`}
                   className="border border-gray-200 bg-white rounded-lg p-5 hover:shadow-md hover:border-gray-300 transition"
                 >
-                  <h2 className="font-semibold text-gray-900 mb-1">{company.name}</h2>
-                  <p className="text-xs text-gray-500 mb-3">
-                    Established {company.establishmentYearBS} B.S.
-                  </p>
+                  <div className="flex items-center gap-3 mb-3">
+                    {company.logoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={company.logoUrl}
+                        alt={`${company.name} logo`}
+                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm font-semibold shrink-0">
+                        {company.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <h2 className="font-semibold text-gray-900 truncate">{company.name}</h2>
+                      <p className="text-xs text-gray-500">
+                        Established {company.establishmentYearBS} B.S.
+                      </p>
+                    </div>
+                  </div>
                   <div
                     className={`inline-block text-xs px-2 py-1 rounded ${
                       isUpToDate

@@ -53,6 +53,7 @@ export interface Company {
   id: string;
   name: string;
   establishmentYearBS: string;
+  logoUrl?: string | null;
   documents: CompanyDocument[];
   taxClearances: TaxClearance[];
   experienceLetters: ExperienceLetter[];

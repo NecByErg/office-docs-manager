@@ -12,15 +12,24 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Yo app purai light-theme design ma banेको ho (bg-white, text-gray-900 jasто
+   explicit classes sabai jaso use huन्छ). Dark mode auto-switch le body ko
+   text color matra badalne तर component भित्रको explicit white background
+   sanga collide huन्छ (white text on white bg jasто bug दिन्छ), teसैले
+   yहाँ dark mode auto-detect intentionally hataइएको छ. */
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Sabai select/input/textarea ma explicit text ra background color -
+   browser/OS ko theme jे भए पनि, यी सधैं देखिने रहुन् */
+select,
+input,
+textarea {
+  color: #111827;
+  background-color: #ffffff;
+}
+
