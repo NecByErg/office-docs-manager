@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { SectionType, Sector } from "@/types";
+import CompanyAdminRow from "./CompanyAdminRow";
 
 interface CompanyRow {
   id: string;
@@ -149,14 +150,12 @@ export default function AdminClient({ companies, sectionTypes, sectors }: Props)
 
           <div className="mt-4 space-y-1.5">
             {companies.map((c) => (
-              <Link
+              <CompanyAdminRow
                 key={c.id}
-                href={`/company/${c.id}`}
-                className="flex items-center justify-between text-sm border border-gray-100 rounded-md px-3 py-2 hover:bg-gray-50"
-              >
-                <span className="text-gray-800">{c.name}</span>
-                <span className="text-xs text-gray-500">{c.establishmentYearBS} B.S.</span>
-              </Link>
+                id={c.id}
+                name={c.name}
+                establishmentYearBS={c.establishmentYearBS}
+              />
             ))}
           </div>
         </section>
