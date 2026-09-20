@@ -1,27 +1,22 @@
 // ==============================================
 // Upload API
 // ==============================================
-// Yo route le sabai upload handle garxa - static documents (Registration/VAT/custom),
-// Tax Clearance, ra Experience Letters, sabai euta nai ठाउँमा.
-//
-// FLOW:
-// 1. File receive garne (PNG/JPG/PDF junसुकै)
-// 2. PDF ma convert + compress garne (max 50% compression, quality maintain)
-// 3. Vercel Blob ma save garne (primary storage)
-// 4. Google Drive ma backup pathaune (secondary, best-effort)
-// 5. Database ma record banaune (kun type ho teो anusar: static/tax/experience)
-
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { convertToCompressedPdf } from "@/lib/pdfConvert";
 import { uploadFile, deleteFile } from "@/lib/blobStorage";
 import { backupToGoogleDrive } from "@/lib/googleDriveBackup";
 
+const WORD_MIME_TYPES = [
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+  "application/msword", // .doc
+];
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
-    const uploadType = formData.get("uploadType") as string; // "static" | "tax_clearance" | "experience_letter"
+    const uploadType = formData.get("uploadType") as string; // "static" | "tax_clearance" | "experience_letter" | "letterhead"
     const companyId = formData.get("companyId") as string;
 
     if (!file || !uploadType || !companyId) {
@@ -31,29 +26,61 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // File lai buffer ma convert garne
     const arrayBuffer = await file.arrayBuffer();
     const originalBuffer = Buffer.from(arrayBuffer);
 
-    // Step 1: PDF ma convert + compress garne
+    // ============================================
+    // LETTERHEAD (Word doc) - PDF conversion NAGARNE, as-is store garne
+    // ============================================
+    if (uploadType === "letterhead") {
+      if (!WORD_MIME_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: "Letterhead must be a Word document (.doc or .docx)" },
+          { status: 400 }
+        );
+      }
+
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const blobFileName = `${companyId}/letterhead/${Date.now()}-${safeFileName}`;
+
+      const { url: fileUrl } = await uploadFile(blobFileName, originalBuffer, file.type);
+      const backupUrl = await backupToGoogleDrive(blobFileName, originalBuffer);
+
+      const existing = await prisma.company.findUnique({ where: { id: companyId } });
+      if (existing?.letterheadUrl) {
+        await deleteFile(existing.letterheadUrl);
+      }
+
+      const updated = await prisma.company.update({
+        where: { id: companyId },
+        data: {
+          letterheadUrl: fileUrl,
+          letterheadBackupUrl: backupUrl,
+          letterheadFileName: file.name,
+          letterheadFileSizeBytes: originalBuffer.length,
+          letterheadUpdatedAt: new Date(),
+        },
+      });
+
+      return NextResponse.json({ company: updated }, { status: 201 });
+    }
+
+    // ============================================
+    // STATIC / TAX CLEARANCE / EXPERIENCE LETTER - purano flow (PDF convert)
+    // ============================================
     const { buffer: pdfBuffer } = await convertToCompressedPdf(originalBuffer, file.type);
 
-    // Step 2: Vercel Blob ma upload garne
     const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const blobFileName = `${companyId}/${uploadType}/${Date.now()}-${safeFileName.replace(/\.[^.]+$/, "")}.pdf`;
     const { url: fileUrl } = await uploadFile(blobFileName, pdfBuffer);
-
-    // Step 3: Google Drive ma backup (fail vaye pani upload continue huन्छ)
     const backupUrl = await backupToGoogleDrive(blobFileName, pdfBuffer);
 
-    // Step 4: Database record banaune - uploadType anusar farak table ma
     if (uploadType === "static") {
       const sectionTypeId = formData.get("sectionTypeId") as string;
       if (!sectionTypeId) {
         return NextResponse.json({ error: "sectionTypeId required for static upload" }, { status: 400 });
       }
 
-      // Purano document xa vane, purano blob file delete garne (replace huन्छ, history rakhdaina)
       const existing = await prisma.companyDocument.findUnique({
         where: { companyId_sectionTypeId: { companyId, sectionTypeId } },
       });
@@ -76,7 +103,6 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "fiscalYear required for tax clearance upload" }, { status: 400 });
       }
 
-      // Naya upload automatically "latest" huन्छ, baaki sabai lai latest=false garne
       await prisma.taxClearance.updateMany({
         where: { companyId },
         data: { isLatest: false },

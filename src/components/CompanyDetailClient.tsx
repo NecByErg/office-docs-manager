@@ -9,6 +9,7 @@ import TaxClearanceSection from "./TaxClearanceSection";
 import ExperienceLettersSection from "./ExperienceLettersSection";
 import MergeDownloadBar from "./MergeDownloadBar";
 import CompanyLogo from "./CompanyLogo";
+import LetterheadSection from "./LetterheadSection";
 
 interface Props {
   company: Company;
@@ -69,6 +70,13 @@ export default function CompanyDetailClient({
       </header>
 
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-6 space-y-5 pb-40">
+        <LetterheadSection
+          companyId={company.id}
+          letterheadUrl={company.letterheadUrl}
+          letterheadFileName={company.letterheadFileName}
+          onRefresh={handleRefresh}
+        />
+
         <StaticDocumentsSection
           companyId={company.id}
           documents={company.documents}

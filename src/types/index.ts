@@ -54,6 +54,10 @@ export interface Company {
   name: string;
   establishmentYearBS: string;
   logoUrl?: string | null;
+  letterheadUrl?: string | null;
+  letterheadFileName?: string | null;
+  letterheadFileSizeBytes?: number | null;
+  letterheadUpdatedAt?: string | Date | null;
   documents: CompanyDocument[];
   taxClearances: TaxClearance[];
   experienceLetters: ExperienceLetter[];

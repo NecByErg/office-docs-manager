@@ -25,6 +25,13 @@ model Company {
   logoUrl             String?                              // Company logo image (dashboard card ra company page ma देखिने)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  
+// NEW: Letterhead (Word file, ek company ma euta matra, replace huन्छ)
+  letterheadUrl           String?
+  letterheadBackupUrl     String?
+  letterheadFileName      String?
+  letterheadFileSizeBytes Int?
+  letterheadUpdatedAt     DateTime?
 
   // Relations - yo company sanga sambandhit documents haru
   documents         CompanyDocument[]
