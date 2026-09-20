@@ -1,35 +1,273 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0e1a;
+  --foreground: #e8eaf0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+
+  --font-sans: var(--font-body);
   --font-mono: var(--font-geist-mono);
+
+  --color-white: #131a2e;
+
+  --color-gray-50: transparent;
+  --color-gray-100: #212a45;
+  --color-gray-200: #2b3554;
+  --color-gray-300: #3c4770;
+  --color-gray-400: #6b7490;
+  --color-gray-500: #8b92a8;
+  --color-gray-700: #c9cee0;
+  --color-gray-800: #e8eaf0;
+
+  /* Default text color */
+  --color-gray-900: #facc15;
+
+  --color-blue-600: #60a5fa;
+  --color-red-600: #f87171;
 }
 
-/* Yo app purai light-theme design ma banेको ho (bg-white, text-gray-900 jasто
-   explicit classes sabai jaso use huन्छ). Dark mode auto-switch le body ko
-   text color matra badalne तर component भित्रको explicit white background
-   sanga collide huन्छ (white text on white bg jasто bug दिन्छ), teसैले
-   yहाँ dark mode auto-detect intentionally hataइएको छ. */
+* {
+  box-sizing: border-box;
+}
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  min-height: 100vh;
 }
 
-/* Sabai select/input/textarea ma explicit text ra background color -
-   browser/OS ko theme jे भए पनि, यी सधैं देखिने रहुन् */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading), var(--font-body), sans-serif;
+  letter-spacing: -0.01em;
+}
+
 select,
 input,
 textarea {
-  color: #111827;
-  background-color: #ffffff;
+  color: #e8eaf0;
+  background-color: #526286;
 }
 
+/* =========================
+   COMPANY NAME COLORS
+   ========================= */
+
+.company-bi {
+  color: #fde047;
+}
+
+.company-midas {
+  color: #86efac;
+}
+
+.company-diligent {
+  color: #67e8f9;
+}
+
+.company-netreshwori {
+  color: #fdba74;
+}
+
+/* =========================
+   BACKGROUND MESH
+   ========================= */
+
+.bg-mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #0a0e1a;
+}
+
+.bg-mesh::before,
+.bg-mesh::after,
+.bg-mesh span {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: 0.35;
+  will-change: transform;
+}
+
+.bg-mesh::before {
+  width: 45vw;
+  height: 45vw;
+  left: -10%;
+  top: -10%;
+  background: #3ba226;
+  animation: mesh-drift-1 26s ease-in-out infinite;
+}
+
+.bg-mesh::after {
+  width: 40vw;
+  height: 40vw;
+  right: -10%;
+  top: 10%;
+  background: #199870;
+  animation: mesh-drift-2 32s ease-in-out infinite;
+}
+
+.bg-mesh span {
+  width: 38vw;
+  height: 38vw;
+  left: 30%;
+  bottom: -15%;
+  background: #22d3ee;
+  animation: mesh-drift-3 29s ease-in-out infinite;
+}
+
+@keyframes mesh-drift-1 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(8vw, 6vh) scale(1.15);
+  }
+}
+
+@keyframes mesh-drift-2 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-6vw, 8vh) scale(1.1);
+  }
+}
+
+@keyframes mesh-drift-3 {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-4vw, -8vh) scale(1.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-mesh::before,
+  .bg-mesh::after,
+  .bg-mesh span {
+    animation: none;
+  }
+}
+
+/* =========================
+   CUSTOM CURSOR
+   ========================= */
+
+@media (pointer: fine) {
+  body.custom-cursor-active,
+  body.custom-cursor-active a,
+  body.custom-cursor-active button,
+  body.custom-cursor-active input,
+  body.custom-cursor-active select,
+  body.custom-cursor-active [role="button"] {
+    cursor: none;
+  }
+}
+
+.cursor-dot,
+.cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 9999;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-dot {
+  width: 6px;
+  height: 6px;
+  background: #e40606;
+  transition: transform 0.1s ease;
+}
+
+.cursor-ring {
+  width: 32px;
+  height: 32px;
+  border: 1.5px solid rgba(247, 85, 93, 0.6);
+  transition:
+    width 0.18s ease,
+    height 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
+}
+
+.cursor-ring.cursor-hover {
+  width: 48px;
+  height: 48px;
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(95, 205, 55, 0.8);
+}
+
+/* =========================
+   CLICK RIPPLE
+   ========================= */
+
+.click-ripple {
+  position: fixed;
+  z-index: 9998;
+  pointer-events: none;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    circle,
+    rgba(168, 85, 247, 0.45) 0%,
+    rgba(79, 124, 255, 0.25) 60%,
+    transparent 75%
+  );
+  animation: ripple-expand 0.6s ease-out forwards;
+}
+
+@keyframes ripple-expand {
+  0% {
+    width: 0;
+    height: 0;
+    opacity: 0.9;
+  }
+
+  100% {
+    width: 220px;
+    height: 220px;
+    opacity: 0;
+  }
+}
+
+/* =========================
+   COMPANY HERO
+   ========================= */
+
+.company-hero-name {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+
+  background: linear-gradient(
+    90deg,
+    #ef4444 0%,
+    #f97316 45%,
+    #facc15 100%
+  );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

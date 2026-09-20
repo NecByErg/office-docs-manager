@@ -27,7 +27,6 @@ export default function CompanyDetailClient({
   const router = useRouter();
   const [selectedDocs, setSelectedDocs] = useState<SelectedDoc[]>([]);
 
-  // Upload/delete pachi latest data lyauna page refresh garne (server component re-fetch garxa)
   const handleRefresh = useCallback(() => {
     router.refresh();
   }, [router]);
@@ -55,15 +54,15 @@ export default function CompanyDetailClient({
   return (
     <>
       <header className="border-b border-gray-200 bg-white">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="max-w-4xl mx-auto px-4 py-10">
           <Link href="/dashboard" className="text-xs text-gray-500 hover:underline">
             ← Back to Dashboard
           </Link>
-          <div className="flex items-center gap-4 mt-2">
+          <div className="flex items-center gap-5 mt-4">
             <CompanyLogo companyId={company.id} companyName={company.name} logoUrl={company.logoUrl} />
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">{company.name}</h1>
-              <p className="text-xs text-gray-500">Established {company.establishmentYearBS} B.S.</p>
+              <h1 className="company-hero-name">{company.name}</h1>
+              <p className="text-sm text-gray-500 mt-1">Established {company.establishmentYearBS} B.S.</p>
             </div>
           </div>
         </div>

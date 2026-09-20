@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppChrome from "@/components/AppChrome";
+import AnimatedBackground from "@/components/AnimatedBackground";
+import CursorEffect from "@/components/CursorEffect";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-heading",
+  subsets: ["latin"],
+});
+
+const inter = Inter({
+  variable: "--font-body",
   subsets: ["latin"],
 });
 
@@ -16,7 +23,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Office Documents Manager By Dear Er",
   description: "Internal legal document management system",
-  robots: "noindex, nofollow", // search engines le index nagaros - private system
+  robots: "noindex, nofollow",
 };
 
 export default function RootLayout({
@@ -27,8 +34,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${spaceGrotesk.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
+        <AnimatedBackground />
+        <CursorEffect />
         <AppChrome>{children}</AppChrome>
       </body>
     </html>
