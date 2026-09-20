@@ -4,8 +4,6 @@ import { getExpectedLatestTaxClearanceFY } from "@/lib/fiscalYear";
 import AppFooter from "@/components/AppFooter";
 import LogoutButton from "@/components/LogoutButton";
 
-// Yo page login-protected ra database-driven ho, teसैले build-time ma
-// static prerender nagari, harek request ma live data fetch garne banaउने
 export const dynamic = "force-dynamic";
 
 interface CompanyWithLatestTax {
@@ -30,7 +28,6 @@ export default async function DashboardPage() {
 
   const expectedLatestFY = getExpectedLatestTaxClearanceFY();
 
-  // Kun company ko tax clearance purano vayo (current fiscal year ko naam bhaisakena) teो pattaa lagaune
   const expiredCompanies = companies.filter((c: CompanyWithLatestTax) => {
     const latest = c.taxClearances[0];
     return !latest || latest.fiscalYear !== expectedLatestFY;
@@ -80,7 +77,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {companies.map((company: CompanyWithLatestTax) => {
               const latest = company.taxClearances[0];
               const isUpToDate = latest && latest.fiscalYear === expectedLatestFY;
@@ -89,24 +86,24 @@ export default async function DashboardPage() {
                 <Link
                   key={company.id}
                   href={`/company/${company.id}`}
-                  className="border border-gray-200 bg-white rounded-lg p-5 hover:shadow-md hover:border-gray-300 transition"
+                  className="border border-gray-200 bg-white rounded-lg p-6 hover:shadow-lg hover:border-gray-300 transition"
                 >
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-4 mb-4">
                     {company.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={company.logoUrl}
                         alt={`${company.name} logo`}
-                        className="w-10 h-10 rounded-full object-cover border border-gray-200 shrink-0"
+                        className="w-14 h-14 rounded-full object-cover border border-gray-200 shrink-0"
                       />
                     ) : (
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-sm font-semibold shrink-0">
+                      <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-lg font-semibold shrink-0">
                         {company.name.charAt(0).toUpperCase()}
                       </div>
                     )}
                     <div className="min-w-0">
-                      <h2 className="font-semibold text-gray-900 truncate">{company.name}</h2>
-                      <p className="text-xs text-gray-500">
+                      <h2 className="company-card-name truncate">{company.name}</h2>
+                      <p className="text-xs text-gray-500 mt-1">
                         Established {company.establishmentYearBS} B.S.
                       </p>
                     </div>
