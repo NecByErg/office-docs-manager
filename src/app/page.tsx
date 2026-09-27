@@ -4,8 +4,6 @@ import { getCurrentFiscalYear } from "@/lib/fiscalYear";
 import AppFooter from "@/components/AppFooter";
 import LogoutButton from "@/components/LogoutButton";
 
-// Yo page login-protected ra database-driven ho, teसैले build-time ma
-// static prerender nagari, harek request ma live data fetch garne banaउने
 export const dynamic = "force-dynamic";
 
 interface CompanyWithLatestTax {
@@ -30,7 +28,6 @@ export default async function DashboardPage() {
 
   const currentFiscalYear = getCurrentFiscalYear();
 
-  // Kun company ko tax clearance purano vayo (current fiscal year ko naam bhaisakena) teो pattaa lagaune
   const expiredCompanies = companies.filter((c: CompanyWithLatestTax) => {
     const latest = c.taxClearances[0];
     return !latest || latest.fiscalYear !== currentFiscalYear;
@@ -45,6 +42,15 @@ export default async function DashboardPage() {
             <p className="text-xs text-gray-500">By Dear Er</p>
           </div>
           <div className="flex items-center gap-3">
+
+            {/* ✅ NAYA LINK — Suchidarta Generator */}
+            <Link
+              href="/suchidarta"
+              className="text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md px-3 py-1.5 font-medium"
+            >
+              📄 Create Suchidarta
+            </Link>
+
             <Link
               href="/admin"
               className="text-sm text-gray-600 hover:text-gray-900 border border-gray-300 rounded-md px-3 py-1.5"
