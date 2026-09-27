@@ -1,0 +1,26 @@
+# unicode_to_preeti.py
+
+PREETI_MAP = {
+    '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
+    '५': '5', '६': '6', '७': '7', '८': '8', '९': '9',
+    'क': 'k', 'ख': 'K', 'ग': 'g', 'घ': 'G', 'ङ': 'ª',
+    'च': 'c', 'छ': 'C', 'ज': 'j', 'झ': 'J', 'ञ': '`',
+    'ट': 'T', 'ठ': 'Y', 'ड': 'D', 'ढ': 'O', 'ण': 'N',
+    'त': 't', 'थ': 'F', 'द': 'd', 'ध': 'H', 'न': 'n',
+    'प': 'p', 'फ': 'P', 'ब': 'b', 'भ': 'B', 'म': 'm',
+    'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'श': 'z',
+    'ष': 'q', 'स': 's', 'ह': 'h', '।': '|',
+    'ा': 'f', 'ि': 's', 'ी': 'L', 'ु': 'u', 'ू': 'U',
+    'े': 'e', 'ै': 'E', 'ो': 'o', 'ौ': 'O', 'ं': 'M',
+    'ः': ':', '्': 'a', '्र': 'r', 'र्': 'R'
+}
+
+def to_preeti(text: str) -> str:
+    """Converts Devanagari Unicode string to Preeti ASCII format."""
+    if not text:
+        return ""
+    
+    result = []
+    for char in text:
+        result.append(PREETI_MAP.get(char, char))
+    return "".join(result)
