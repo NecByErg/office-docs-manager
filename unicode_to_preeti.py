@@ -1,5 +1,3 @@
-# unicode_to_preeti.py
-
 PREETI_MAP = {
     '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
     '५': '5', '६': '6', '७': '7', '८': '8', '९': '9',
@@ -16,10 +14,8 @@ PREETI_MAP = {
 }
 
 def to_preeti(text: str) -> str:
-    """Converts Devanagari Unicode string to Preeti ASCII format."""
     if not text:
         return ""
-    
     result = []
     for char in text:
         result.append(PREETI_MAP.get(char, char))
