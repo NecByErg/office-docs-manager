@@ -8,7 +8,16 @@ export const dynamic = "force-dynamic";
 
 export default async function SuchidartaPage() {
   const companies = await prisma.company.findMany({
-    orderBy: { name: "asc" },
+    where: {
+      OR: [
+        { name: { contains: "BI Engineering" } },
+        { name: { contains: "Netreshwori" } },
+        { name: { contains: "Diligent" } },
+        { name: { contains: "Matamandali" } },
+        { name: { contains: "Midas" } },
+        { name: { contains: "Hints" } },
+      ],
+    },
     include: {
       documents: {
         include: { sectionType: true },
@@ -18,6 +27,7 @@ export default async function SuchidartaPage() {
         where: { isDeleted: false },
       },
     },
+    orderBy: { name: "asc" },
   });
 
   return (

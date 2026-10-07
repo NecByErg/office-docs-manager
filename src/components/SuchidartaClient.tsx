@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import {
-  unicodeToPreeti,
-  PREETI_SUCHIDARTA,
-  UNICODE_SUCHIDARTA,
-  ENGLISH_SUCHIDARTA,
-} from "@/lib/preeti";
+import { unicodeToPreeti } from "@/lib/preeti";
 
 type CompanyDoc = {
   id: string;
@@ -27,240 +22,171 @@ type Company = {
   name: string;
   logoUrl: string | null;
   establishmentYearBS: string;
-  letterheadUrl?: string | null;
   documents?: CompanyDoc[];
   taxClearances?: CompanyTax[];
 };
 
-export type CompanyProfile = {
-  namePreeti: string;
-  nameUnicode: string;
+export type CompanyConfig = {
   nameEnglish: string;
   regNo: string;
   vatNo: string;
+  namePreeti: string;
   addrPreeti: string;
-  addrUnicode: string;
-  addrEnglish: string;
   contactPreeti: string;
-  contactUnicode: string;
-  contactEnglish: string;
+  mobilePreeti: string;
   mobile: string;
-  servicePreeti: string;
-  serviceUnicode: string;
-  serviceEnglish: string;
-  email: string;
-  phone: string;
-  customDate?: string;
-  customDatePreeti?: string;
+  logoUrl: string;
+  stampUrl: string;
+  signUrl: string;
+  footerText: string;
+  filePrefix: string;
+  date: string;
+  datePreeti: string;
 };
 
-const DEFAULT_COMPANY_PROFILES: Record<string, Partial<CompanyProfile>> = {
-  // BI Engineering
+const DEFAULT_COMPANIES_CONFIG: Record<string, Partial<CompanyConfig>> = {
+  // 1. BI Engineering
   cmsrcze8c0000jv0443e2o5aa: {
-    nameEnglish: "B.I. ENGINEERING CONSULTANCY PVT. LTD.",
-    namePreeti: "la= cfO{= O{lGhlgol/Ë sG;N6]G;L k|f =ln",
-    nameUnicode: "वि. आई. इन्जिनियरिङ्ग कन्सल्टेन्सी प्रा. लि.",
+    nameEnglish: "B.I. ENGINEERING CONSULTANCY PVT.LTD.",
     regNo: "220300/076/077",
     vatNo: "609586655",
+    namePreeti: "la= cfO{= O{lGhlgol/Ë sG;N6]G;L k|f =ln",
     addrPreeti: "sf7df08f}",
-    addrUnicode: "टोखा नगरपालिका-०७, काठमाडौँ",
-    addrEnglish: "Tokha Municipality-07, Kathmandu, Nepal",
     contactPreeti: "lagf]b Zffx",
-    contactUnicode: "विनोद शाह",
-    contactEnglish: "Binod Shah",
+    mobilePreeti: "(*$*^^)#(#",
     mobile: "9848660393",
-    phone: "+977-9860133281",
-    email: "biconsultancy2076@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "तालिम र परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Training and Consulting Services",
+    logoUrl: "/suchidarta/extracted/bi_image1.jpeg",
+    stampUrl: "/suchidarta/extracted/bi_image2.png",
+    signUrl: "/suchidarta/extracted/bi_image2.png",
+    footerText: "Tokha Municipality-07, Kathmandu, Nepal | E-mail:- biconsultancy2076@gmail.com | Ph.:- +977-9860133281",
+    filePrefix: "BI Suchidarta For",
+    date: "२०८१।०४।०१",
+    datePreeti: "@)*!÷)$÷)!",
   },
-  // Tripur
-  cmu2bvxae0001la041v46xkyn: {
-    nameEnglish: "TRIPUR ENGINEERING PVT. LTD.",
-    namePreeti: "lqk'/ O{lGhlgol/Ë k|f= ln=",
-    nameUnicode: "त्रिपुर इन्जिनियरिङ्ग प्रा. लि.",
-    regNo: "242749/077/078",
-    vatNo: "609804868",
-    addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
-    mobile: "9851000000",
-    phone: "",
-    email: "tripurengineering@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
-  },
-  // Diligent
-  cmu2bv64v0000la04vx9ei2x3: {
-    nameEnglish: "DILIGENT ENGINEERING SOLUTION PVT. LTD.",
-    namePreeti: "l8lnh]G6 O{lGhlgol/Ë ;n';g k|f= ln=",
-    nameUnicode: "डिलिजेन्ट इन्जिनियरिङ्ग सोलुसन प्रा. लि.",
-    regNo: "241852/077/078",
-    vatNo: "609795123",
-    addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
-    mobile: "9841000000",
-    phone: "",
-    email: "diligentengineering@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
-  },
-  // Matamandali
-  cmsrd0y4d0001jv04qlh0pa52: {
-    nameEnglish: "MATAMANDALI ENGINEERING CONSULTANCY PVT. LTD.",
-    namePreeti: "df:tfdf08nL O{lGhlgol/Ë sG;N6]G;L k|f= ln=",
-    nameUnicode: "मास्तामाण्डली इन्जिनियरिङ्ग कन्सल्टेन्सी प्रा. लि.",
-    regNo: "221450/076/077",
-    vatNo: "609598712",
-    addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
-    mobile: "9849000000",
-    phone: "",
-    email: "matamandali@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
-  },
-  // Netreshwori
+  // 2. Netreshwori
   cmsrcjmk10001l10424k4dtiv: {
-    nameEnglish: "NETRESHWORI ENGINEERING CONSULTANCY PVT. LTD.",
-    namePreeti: "g]q]Zj/L O{lGhlgol/Ë sG;N6]G;L k|f= ln=",
-    nameUnicode: "नेत्रेश्वरी इन्जिनियरिङ्ग कन्सल्टेन्सी प्रा. लि.",
-    regNo: "220110/076/077",
+    nameEnglish: "NETRESHWORI ENGINEERING CONSULTANCY [P] Ltd.",
+    regNo: "148054/72/073",
     vatNo: "609571234",
+    namePreeti: "g]q]Zj/L O{lGhlgol/Ë sG;N6]G;L k|f =ln",
     addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
-    mobile: "9851122334",
-    phone: "",
-    email: "netreshwori@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
+    contactPreeti: "eQm /fh hf]zL",
+    mobilePreeti: "(*%!@!&!%@",
+    mobile: "9851217152",
+    logoUrl: "/suchidarta/extracted/netreshwori_image4.jpeg",
+    stampUrl: "/suchidarta/extracted/netreshwori_image2.png",
+    signUrl: "/suchidarta/extracted/netreshwori_image3.png",
+    footerText: "Tokha Municipality-12, Kathmandu, Nepal | E-mail:- netreshworiconsultancy@gmail.com | Ph.:- +977-9851217152",
+    filePrefix: "Suchidarta of Netreshwori for",
+    date: "२०८१।०४।०२",
+    datePreeti: "@)*!÷)$÷)@",
   },
-  // Midas
+  // 3. Diligent
+  cmu2bv64v0000la04vx9ei2x3: {
+    nameEnglish: "DILIGENT ENGINEERING Solution(p) ltd.",
+    regNo: "307731/079/080",
+    vatNo: "610452840",
+    namePreeti: "l8lnh]G6 O{lGhlgol/Ë ;n';g k|f= ln=",
+    addrPreeti: "sf7df08f}",
+    contactPreeti: "pd]z hf]zL",
+    mobilePreeti: "(*%!#$$$^)",
+    mobile: "9851344460",
+    logoUrl: "/suchidarta/extracted/diligent_image1.jpeg",
+    stampUrl: "/suchidarta/extracted/diligent_image3.png",
+    signUrl: "/suchidarta/extracted/diligent_image4.png",
+    footerText: "Anamnagar, Kathamandu, Nepal | Email : - dengineeringsolution@gmail.com | Mob: - +977-9851344460",
+    filePrefix: "Diligent Suchidarta For",
+    date: "२०८१।०४।०३",
+    datePreeti: "@)*!÷)$÷)#",
+  },
+  // 4. Mastamandali
+  cmsrd0y4d0001jv04qlh0pa52: {
+    nameEnglish: "MASTAMANDALI ENGINEERING CONSULTANCY (P) Ltd.",
+    regNo: "151887/072/073",
+    vatNo: "609598712",
+    namePreeti: "df:tfdf08nL O{lGhlgol/Ë sG;N6]G;L k|f= ln=",
+    addrPreeti: "sf7df08f}",
+    contactPreeti: ";'hg l;Dv8f",
+    mobilePreeti: "(*%!@!&!()",
+    mobile: "9851217190",
+    logoUrl: "/suchidarta/extracted/mastamandali_image4.jpeg",
+    stampUrl: "/suchidarta/extracted/mastamandali_image2.png",
+    signUrl: "/suchidarta/extracted/mastamandali_image3.png",
+    footerText: "Nagarjun Municipality-4, Bafal, Kathamandu, Nepal | E-Mail:- Simkhadasujan30@gmail.com | Mob: - +977-9851217190",
+    filePrefix: "Mastamandali Suchidarta For",
+    date: "२०८१।०४।०४",
+    datePreeti: "@)*!÷)$÷)$",
+  },
+  // 5. Midas
   cmsyc4dd80000jx04khgkqvz6: {
-    nameEnglish: "MIDAS ENGINEERING CONSULTANCY PVT. LTD.",
+    nameEnglish: "MIDAS ENGINEERING CONSULTANT",
+    regNo: "195373/075/076",
+    vatNo: "606636461",
     namePreeti: "dfO{8; O{lGhlgol/Ë sG;N6]G;L k|f= ln=",
-    nameUnicode: "माइडस इन्जिनियरिङ्ग कन्सल्टेन्सी प्रा. लि.",
-    regNo: "223400/076/077",
-    vatNo: "609612345",
     addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
-    mobile: "9841556677",
-    phone: "",
-    email: "midasengineering@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
+    contactPreeti: ";'/]z a+;L 7s'/L",
+    mobilePreeti: "(*$!%$!)*(",
+    mobile: "9841541049",
+    logoUrl: "/suchidarta/extracted/midas_image1.png",
+    stampUrl: "/suchidarta/extracted/midas_image1.png",
+    signUrl: "/suchidarta/extracted/midas_image2.png",
+    footerText: "Adress :- Bafal, Kathmandu | Email :- sbthakuri2015@gmail.com",
+    filePrefix: "Midas Suchidarta For",
+    date: "२०८१।०४।०५",
+    datePreeti: "@)*!÷)$÷)%",
   },
-  // Hints Consult
+  // 6. Hints
   cmuxm3q2r0000kz04wznn2nwb: {
     nameEnglish: "HINTS CONSULT PVT. LTD.",
-    namePreeti: "lxG6\; sG;N6 k|f= ln=",
-    nameUnicode: "हिन्ट्स कन्सल्ट प्रा. लि.",
     regNo: "225600/076/077",
     vatNo: "609689012",
+    namePreeti: "lxG6\; sG;N6 k|f= ln=",
     addrPreeti: "sf7df08f}",
-    addrUnicode: "काठमाडौँ",
-    addrEnglish: "Kathmandu, Nepal",
-    contactPreeti: "k|d'v",
-    contactUnicode: "प्रबन्ध निर्देशक",
-    contactEnglish: "Managing Director",
+    contactPreeti: "O{= ks+h Gof}kfg]",
+    mobilePreeti: "(*%!&&**((",
     mobile: "9851778899",
-    phone: "",
-    email: "hintsconsult@gmail.com",
-    servicePreeti: "tflnd / k/fdz{ ;]jf ;DaGwL",
-    serviceUnicode: "परामर्श सेवा सम्बन्धी",
-    serviceEnglish: "Consulting Services",
+    logoUrl: "/suchidarta/extracted/hints_image1.png",
+    stampUrl: "/suchidarta/extracted/hints_image1.png",
+    signUrl: "/suchidarta/extracted/hints_image2.png",
+    footerText: "Kathmandu, Nepal | Email: hintsconsult@gmail.com",
+    filePrefix: "Hints Suchidarta For",
+    date: "२०८१।०४।०६",
+    datePreeti: "@)*!÷)$÷)^",
   },
 };
 
-const OFFICE_PRESETS = [
-  {
-    name: "पूर्वाधार विकास कार्यालय, पाँचथर",
-    key: "Panchthar",
-    addressPreeti: `>Ldfg\\sfo{no k|d'v Ho",\nk'jf{wf/ ljsf; sfof{no, kfFry/`,
-    addressUnicode: `श्रीमान् कार्यालय प्रमुख ज्यू,\nपूर्वाधार विकास कार्यालय, पाँचथर`,
-    addressEnglish: `The Office Chief,\nInfrastructure Development Office, Panchthar`,
-  },
-  {
-    name: "आन्तरिक मामिला तथा कानून मन्त्रालय, विराटनगर",
-    key: "Biratnagar",
-    addressPreeti: `>L ;lrjHo",\ncfGtl/s dfldnf tyf sfg"g dGqfno,\nsf]zL k|b]z, lj/f6gu/`,
-    addressUnicode: `श्री सचिव ज्यू,\nआन्तरिक मामिला तथा कानून मन्त्रालय,\nकोशी प्रदेश, विराटनगर`,
-    addressEnglish: `The Secretary,\nMinistry of Internal Affairs and Law,\nKoshi Province, Biratnagar`,
-  },
-  {
-    name: "सडक डिभिजन कार्यालय, ईलाम",
-    key: "Ilam",
-    addressPreeti: `>Ldfg\\sfo{no k|d'v Ho",\ns8s l8lehg sfof{no, O{nfd`,
-    addressUnicode: `श्रीमान् कार्यालय प्रमुख ज्यू,\nसडक डिभिजन कार्यालय, ईलाम`,
-    addressEnglish: `The Division Chief,\nRoad Division Office, Ilam`,
-  },
-];
-
-type FontMode = "preeti" | "unicode" | "english";
+const DEFAULT_OFFICE_PREETI = `>Ldfg l8lehg k|d'v Ho"",\nvfg]kfgL tyf ;/;kmfO{ l8lehg\nvf]6fË`;
+const DEFAULT_OFFICE_UNICODE = `श्रीमान् डिभिजन प्रमुख ज्यू,\nखानेपानी तथा सरसफाई डिभिजन\nखोटाङ`;
 
 export default function SuchidartaClient({
   companies,
 }: {
   companies: Company[];
 }) {
-  const [fontMode, setFontMode] = useState<FontMode>("preeti");
-  const [sel, setSel] = useState<Set<string>>(new Set(companies.map((c) => c.id)));
-  const [profiles, setProfiles] = useState<Record<string, CompanyProfile>>({});
+  // Only the 6 target companies
+  const targetCompanies = useMemo(() => {
+    return companies.filter((c) => DEFAULT_COMPANIES_CONFIG[c.id]);
+  }, [companies]);
 
-  // Common Office Settings
-  const [selectedPreset, setSelectedPreset] = useState("Panchthar");
-  const [officeKey, setOfficeKey] = useState("Panchthar");
-  const [addrText, setAddrText] = useState(
-    `श्रीमान् कार्यालय प्रमुख ज्यू,\nपूर्वाधार विकास कार्यालय, पाँचथर`
-  );
-  const [addrPreetiText, setAddrPreetiText] = useState(
-    `>Ldfg\\sfo{no k|d'v Ho",\nk'jf{wf/ ljsf; sfof{no, kfFry/`
-  );
-  const [addrEnglishText, setAddrEnglishText] = useState(
-    `The Office Chief,\nInfrastructure Development Office, Panchthar`
+  const [sel, setSel] = useState<Set<string>>(
+    new Set(targetCompanies.map((c) => c.id))
   );
 
-  // Common Dates
-  const [masterDate, setMasterDate] = useState("२०८३/०४/०५");
-  const [masterDatePreeti, setMasterDatePreeti] = useState("@)*#÷)$÷)%");
-  const [masterDateEnglish, setMasterDateEnglish] = useState("2026/07/20");
+  const [configs, setConfigs] = useState<Record<string, CompanyConfig>>({});
 
-  const [fiscalYear, setFiscalYear] = useState("२०८३/०८४");
-  const [fiscalYearPreeti, setFiscalYearPreeti] = useState("@)*#÷)*$");
-  const [fiscalYearEnglish, setFiscalYearEnglish] = useState("2083/084");
+  // 1. Common Office Address (Same for all 6 companies)
+  const [officeName, setOfficeName] = useState("Khotang");
+  const [officePreeti, setOfficePreeti] = useState(DEFAULT_OFFICE_PREETI);
+  const [officeUnicode, setOfficeUnicode] = useState(DEFAULT_OFFICE_UNICODE);
+
+  // 2. Fiscal Year (Same for all 6 companies)
+  const [fiscalYear, setFiscalYear] = useState("२०८१/०८२");
+  const [fiscalYearPreeti, setFiscalYearPreeti] = useState("@)*!÷)*@");
 
   // Document attachment toggles
   const [attachReg, setAttachReg] = useState(true);
   const [attachVat, setAttachVat] = useState(true);
   const [attachTax, setAttachTax] = useState(true);
-
-  // Per-company expanded state
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   // Preview state
   const [previewCompany, setPreviewCompany] = useState<Company | null>(null);
@@ -270,7 +196,7 @@ export default function SuchidartaClient({
   const [isGenerating, setIsGenerating] = useState(false);
   const [progressMsg, setProgressMsg] = useState("");
 
-  // Initialize profiles
+  // Initialize company configs
   useEffect(() => {
     // Inject Preeti font if needed
     if (!document.getElementById("preeti-font")) {
@@ -280,91 +206,63 @@ export default function SuchidartaClient({
       document.head.appendChild(s);
     }
 
-    // Load saved profiles from localStorage or defaults
-    const initialProfiles: Record<string, CompanyProfile> = {};
-    let saved: Record<string, Partial<CompanyProfile>> = {};
+    const initial: Record<string, CompanyConfig> = {};
+    let saved: Record<string, Partial<CompanyConfig>> = {};
     try {
-      const s = localStorage.getItem("suchi-meta-v3");
+      const s = localStorage.getItem("suchi-meta-v4");
       if (s) saved = JSON.parse(s);
     } catch {}
 
-    companies.forEach((c) => {
-      const def = DEFAULT_COMPANY_PROFILES[c.id] || {};
+    targetCompanies.forEach((c) => {
+      const def = DEFAULT_COMPANIES_CONFIG[c.id] || {};
       const s = saved[c.id] || {};
 
-      initialProfiles[c.id] = {
-        nameEnglish: s.nameEnglish || def.nameEnglish || c.name,
-        namePreeti: s.namePreeti || def.namePreeti || unicodeToPreeti(c.name),
-        nameUnicode: s.nameUnicode || def.nameUnicode || c.name,
-        regNo: s.regNo || def.regNo || "",
-        vatNo: s.vatNo || def.vatNo || "",
-        addrEnglish: s.addrEnglish || def.addrEnglish || "Kathmandu, Nepal",
-        addrPreeti: s.addrPreeti || def.addrPreeti || "sf7df08f}",
-        addrUnicode: s.addrUnicode || def.addrUnicode || "काठमाडौँ",
-        contactEnglish: s.contactEnglish || def.contactEnglish || "Managing Director",
-        contactPreeti: s.contactPreeti || def.contactPreeti || "k|d'v",
-        contactUnicode: s.contactUnicode || def.contactUnicode || "प्रबन्ध निर्देशक",
-        mobile: s.mobile || def.mobile || "",
-        phone: s.phone || def.phone || "",
-        email: s.email || def.email || "",
-        serviceEnglish: s.serviceEnglish || def.serviceEnglish || "Consulting Services",
-        servicePreeti: s.servicePreeti || def.servicePreeti || "tflnd / k/fdz{ ;]jf ;DaGwL",
-        serviceUnicode: s.serviceUnicode || def.serviceUnicode || "परामर्श सेवा सम्बन्धी",
-        customDate: s.customDate || "",
-        customDatePreeti: s.customDatePreeti || "",
+      initial[c.id] = {
+        nameEnglish: def.nameEnglish || c.name,
+        regNo: def.regNo || "",
+        vatNo: def.vatNo || "",
+        namePreeti: def.namePreeti || unicodeToPreeti(c.name),
+        addrPreeti: def.addrPreeti || "sf7df08f}",
+        contactPreeti: def.contactPreeti || "k|d'v",
+        mobilePreeti: def.mobilePreeti || "(*%!@!&!%@",
+        mobile: def.mobile || "9851217152",
+        logoUrl: def.logoUrl || c.logoUrl || "",
+        stampUrl: def.stampUrl || c.logoUrl || "",
+        signUrl: def.signUrl || "",
+        footerText: def.footerText || "Kathmandu, Nepal",
+        filePrefix: def.filePrefix || `${c.name} Suchidarta For`,
+        date: s.date || def.date || "२०८१।०४।०१",
+        datePreeti: s.datePreeti || def.datePreeti || "@)*!÷)$÷)!",
       };
     });
 
-    setProfiles(initialProfiles);
-  }, [companies]);
+    setConfigs(initial);
+  }, [targetCompanies]);
 
-  // Handle preset change
-  const handlePresetSelect = (presetKey: string) => {
-    setSelectedPreset(presetKey);
-    const found = OFFICE_PRESETS.find((p) => p.key === presetKey);
-    if (found) {
-      setOfficeKey(found.key);
-      setAddrPreetiText(found.addressPreeti);
-      setAddrText(found.addressUnicode);
-      setAddrEnglishText(found.addressEnglish);
-    }
+  const updateCompanyDate = (companyId: string, newDate: string) => {
+    const pDate = unicodeToPreeti(newDate);
+    setConfigs((prev) => {
+      const current = prev[companyId];
+      if (!current) return prev;
+      const next = {
+        ...prev,
+        [companyId]: { ...current, date: newDate, datePreeti: pDate },
+      };
+      try {
+        localStorage.setItem("suchi-meta-v4", JSON.stringify(next));
+      } catch {}
+      return next;
+    });
   };
 
-  // Sync date changes across representations
-  const handleMasterDateChange = (val: string) => {
-    setMasterDate(val);
-    const converted = unicodeToPreeti(val);
-    setMasterDatePreeti(converted);
+  const handleOfficeUnicodeChange = (val: string) => {
+    setOfficeUnicode(val);
+    setOfficePreeti(unicodeToPreeti(val));
   };
 
   const handleFiscalYearChange = (val: string) => {
     setFiscalYear(val);
-    const converted = unicodeToPreeti(val);
-    setFiscalYearPreeti(converted);
-  };
-
-  // Update company profile
-  const updateProfile = (id: string, field: keyof CompanyProfile, val: string) => {
-    setProfiles((prev) => {
-      const current = prev[id] || {};
-      const next = { ...prev, [id]: { ...current, [field]: val } };
-
-      // Auto-convert if editing Unicode name/address/date
-      if (field === "nameUnicode") {
-        next[id].namePreeti = unicodeToPreeti(val);
-      } else if (field === "addrUnicode") {
-        next[id].addrPreeti = unicodeToPreeti(val);
-      } else if (field === "contactUnicode") {
-        next[id].contactPreeti = unicodeToPreeti(val);
-      } else if (field === "customDate") {
-        next[id].customDatePreeti = unicodeToPreeti(val);
-      }
-
-      try {
-        localStorage.setItem("suchi-meta-v3", JSON.stringify(next));
-      } catch {}
-      return next;
-    });
+    setFiscalYearPreeti(unicodeToPreeti(val));
   };
 
   const toggleSelect = (id: string) => {
@@ -380,487 +278,163 @@ export default function SuchidartaClient({
   };
 
   const selectedList = useMemo(
-    () => companies.filter((c) => sel.has(c.id)),
-    [companies, sel]
+    () => targetCompanies.filter((c) => sel.has(c.id)),
+    [targetCompanies, sel]
   );
 
-  // Build the HTML for Page 1 of Suchidarta
+  // Generate exact Page 1 HTML matching user's Image 2
   const buildPage1HTML = (company: Company): string => {
-    const prof = profiles[company.id] || DEFAULT_COMPANY_PROFILES[company.id] || {};
-
-    const activeDate =
-      prof.customDate && prof.customDate.trim() !== ""
-        ? prof.customDate
-        : masterDate;
-
-    const activeDatePreeti =
-      prof.customDatePreeti && prof.customDatePreeti.trim() !== ""
-        ? prof.customDatePreeti
-        : masterDatePreeti;
-
-    if (fontMode === "preeti") {
-      const d = PREETI_SUCHIDARTA;
-      const addrLines = (addrPreetiText || unicodeToPreeti(addrText)).split("\n").join("<br/>");
-      const companyPreeti = prof.namePreeti || unicodeToPreeti(prof.nameUnicode || company.name);
-      const contactPreeti = prof.contactPreeti || unicodeToPreeti(prof.contactUnicode || "");
-      const servicePreeti = prof.servicePreeti || unicodeToPreeti(prof.serviceUnicode || "परामर्श सेवा सम्बन्धी");
-      const addrP = prof.addrPreeti || "sf7df08f}";
-      const mobP = unicodeToPreeti(prof.mobile || "");
-
-      return `
-<div style="font-family:'Preeti',serif;font-size:11pt;padding:12mm 18mm 14mm 18mm;width:794px;min-height:1120px;background:#fff;box-sizing:border-box;color:#000;line-height:1.6;">
-  <!-- Letterhead Header -->
-  <div style="border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;position:relative;">
-    <table style="width:100%;border-collapse:collapse;border:none;">
-      <tr>
-        ${
-          company.logoUrl
-            ? `<td style="width:85px;vertical-align:middle;text-align:left;border:none;padding:0;">
-                <img src="${company.logoUrl}" style="width:75px;height:75px;object-fit:contain;" crossorigin="anonymous"/>
-               </td>`
-            : ""
-        }
-        <td style="text-align:center;vertical-align:middle;border:none;padding:0;">
-          <div style="font-family:'Times New Roman',Arial,sans-serif;font-size:16pt;font-weight:bold;letter-spacing:0.5px;color:#111827;">
-            ${prof.nameEnglish || company.name}
-          </div>
-          <div style="font-family:'Times New Roman',Arial,sans-serif;font-size:10pt;font-weight:600;margin-top:2px;">
-            ${prof.regNo ? `Reg. No. : - ${prof.regNo}` : ""} &nbsp;&nbsp;&nbsp;&nbsp; ${prof.vatNo ? `Vat. No. :- ${prof.vatNo}` : ""}
-          </div>
-          <div style="font-family:'Times New Roman',Arial,sans-serif;font-size:9.5pt;margin-top:2px;color:#374151;">
-            ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
-          </div>
-        </td>
-      </tr>
-    </table>
-    <div style="margin-top:6px;display:flex;justify-content:space-between;font-family:'Times New Roman',Arial,sans-serif;font-size:9.5pt;font-weight:bold;">
-      <div>Ref No: - </div>
-      <div></div>
-    </div>
-  </div>
-
-  <!-- Heading -->
-  <div style="text-align:center;margin-bottom:10px;line-height:1.7;">
-    <div style="font-size:12pt;font-weight:600;">${d.h1}</div>
-    <div style="font-size:10pt;">${d.h2}</div>
-    <div style="font-size:12pt;font-weight:bold;margin-top:2px;">${d.h3}</div>
-  </div>
-
-  <!-- Date Right -->
-  <div style="text-align:right;font-size:11pt;margin-bottom:8px;font-weight:bold;">
-    ${d.dateL} ${activeDatePreeti}
-  </div>
-
-  <!-- Office Address -->
-  <div style="margin-bottom:10px;line-height:1.8;font-size:11pt;">
-    ${addrLines}
-  </div>
-
-  <!-- Subject -->
-  <div style="font-weight:bold;font-size:11.5pt;margin-bottom:8px;">
-    ${d.subj}
-  </div>
-
-  <!-- Body -->
-  <div style="margin-bottom:10px;text-align:justify;line-height:1.8;font-size:10.5pt;">
-    ${d.body}
-  </div>
-
-  <!-- Tapsil -->
-  <div style="font-weight:bold;font-size:11.5pt;text-align:center;margin-bottom:6px;text-decoration:underline;">
-    ${d.tapsil}
-  </div>
-
-  <!-- Table -->
-  <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:10pt;line-height:1.5;">
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s1}
-      </td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${d.nameLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:32%;">${companyPreeti}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:22%;">${d.addrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${addrP}</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.corrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${addrP}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.contLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${contactPreeti}</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.phoneLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.mobLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${mobP || prof.mobile}</td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s2}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c1} &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c2} &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c3} &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c4} &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;">${d.c5} &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s3}
-      </td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.goods}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.const_}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.consult}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${servicePreeti}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.other}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-    </tr>
-    <tr style="height:55px;">
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.dateL} ${activeDatePreeti}</div>
-        <div style="margin-top:6px;">${d.fyL} ${fiscalYearPreeti}</div>
-      </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;text-align:center;">
-        <div>${d.stamp}</div>
-        ${
-          company.logoUrl
-            ? `<div style="margin-top:2px;"><img src="${company.logoUrl}" style="height:48px;width:48px;object-fit:contain;display:inline-block;" crossorigin="anonymous"/></div>`
-            : `<div style="height:40px;"></div>`
-        }
-      </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.appName} ${contactPreeti}</div>
-        <div style="margin-top:6px;">${d.sign}</div>
-      </td>
-    </tr>
-  </table>
-
-  <!-- Footer Address -->
-  <div style="border-top:1px solid #333;margin-top:14px;padding-top:4px;text-align:center;font-family:'Times New Roman',Arial,sans-serif;font-size:9.5pt;color:#374151;">
-    ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
-  </div>
-</div>
-`;
-    }
-
-    if (fontMode === "unicode") {
-      const d = UNICODE_SUCHIDARTA;
-      const addrLines = addrText.split("\n").join("<br/>");
-      const companyUni = prof.nameUnicode || company.name;
-      const contactUni = prof.contactUnicode || "";
-      const serviceUni = prof.serviceUnicode || "तालिम र परामर्श सेवा सम्बन्धी";
-      const addrU = prof.addrUnicode || "काठमाडौँ";
-
-      return `
-<div style="font-family:'Segoe UI','Noto Sans Devanagari',Arial,sans-serif;font-size:10.5pt;padding:12mm 18mm 14mm 18mm;width:794px;min-height:1120px;background:#fff;box-sizing:border-box;color:#000;line-height:1.6;">
-  <!-- Letterhead Header -->
-  <div style="border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;">
-    <table style="width:100%;border-collapse:collapse;border:none;">
-      <tr>
-        ${
-          company.logoUrl
-            ? `<td style="width:85px;vertical-align:middle;text-align:left;border:none;padding:0;">
-                <img src="${company.logoUrl}" style="width:75px;height:75px;object-fit:contain;" crossorigin="anonymous"/>
-               </td>`
-            : ""
-        }
-        <td style="text-align:center;vertical-align:middle;border:none;padding:0;">
-          <div style="font-size:16pt;font-weight:bold;color:#111827;">${prof.nameEnglish || company.name}</div>
-          <div style="font-size:10pt;font-weight:600;margin-top:2px;">
-            ${prof.regNo ? `Reg. No. : - ${prof.regNo}` : ""} &nbsp;&nbsp;&nbsp;&nbsp; ${prof.vatNo ? `Vat. No. :- ${prof.vatNo}` : ""}
-          </div>
-          <div style="font-size:9.5pt;margin-top:2px;color:#374151;">
-            ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
-          </div>
-        </td>
-      </tr>
-    </table>
-    <div style="margin-top:6px;display:flex;justify-content:space-between;font-size:9.5pt;font-weight:bold;">
-      <div>Ref No: - </div>
-      <div></div>
-    </div>
-  </div>
-
-  <!-- Heading -->
-  <div style="text-align:center;margin-bottom:10px;line-height:1.7;">
-    <div style="font-size:12pt;font-weight:600;">${d.h1}</div>
-    <div style="font-size:10pt;">${d.h2}</div>
-    <div style="font-size:12pt;font-weight:bold;margin-top:2px;">${d.h3}</div>
-  </div>
-
-  <!-- Date Right -->
-  <div style="text-align:right;font-size:11pt;margin-bottom:8px;font-weight:bold;">
-    ${d.dateL} ${activeDate}
-  </div>
-
-  <!-- Office Address -->
-  <div style="margin-bottom:10px;line-height:1.8;font-size:11pt;">
-    ${addrLines}
-  </div>
-
-  <!-- Subject -->
-  <div style="font-weight:bold;font-size:11.5pt;margin-bottom:8px;">
-    ${d.subj}
-  </div>
-
-  <!-- Body -->
-  <div style="margin-bottom:10px;text-align:justify;line-height:1.8;font-size:10.5pt;">
-    ${d.body}
-  </div>
-
-  <!-- Tapsil -->
-  <div style="font-weight:bold;font-size:11.5pt;text-align:center;margin-bottom:6px;text-decoration:underline;">
-    ${d.tapsil}
-  </div>
-
-  <!-- Table -->
-  <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:10pt;line-height:1.5;">
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s1}
-      </td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${d.nameLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:32%;">${companyUni}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:22%;">${d.addrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${addrU}</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.corrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${addrU}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.contLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${contactUni}</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.phoneLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.phone}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.mobLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.mobile}</td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s2}
-      </td>
-    </tr>
-    <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c1} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c2} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c3} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c4} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;">${d.c5} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-    </tr>
-    <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s3}
-      </td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.goods}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.const_}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.consult}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${serviceUni}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.other}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-    </tr>
-    <tr style="height:55px;">
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.dateL} ${activeDate}</div>
-        <div style="margin-top:6px;">${d.fyL} ${fiscalYear}</div>
-      </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;text-align:center;">
-        <div>${d.stamp}</div>
-        ${
-          company.logoUrl
-            ? `<div style="margin-top:2px;"><img src="${company.logoUrl}" style="height:48px;width:48px;object-fit:contain;display:inline-block;" crossorigin="anonymous"/></div>`
-            : `<div style="height:40px;"></div>`
-        }
-      </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.appName} ${contactUni}</div>
-        <div style="margin-top:6px;">${d.sign}</div>
-      </td>
-    </tr>
-  </table>
-
-  <!-- Footer -->
-  <div style="border-top:1px solid #333;margin-top:14px;padding-top:4px;text-align:center;font-size:9.5pt;color:#374151;">
-    ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
-  </div>
-</div>
-`;
-    }
-
-    // English (Times New Roman)
-    const d = ENGLISH_SUCHIDARTA;
-    const addrLines = (addrEnglishText || addrText).split("\n").join("<br/>");
-    const activeDateEng = prof.customDate || masterDateEnglish;
+    const cfg = configs[company.id] || DEFAULT_COMPANIES_CONFIG[company.id] || {};
+    const officeLines = officePreeti.split("\n").join("<br/>");
 
     return `
-<div style="font-family:'Times New Roman',serif;font-size:11pt;padding:12mm 18mm 14mm 18mm;width:794px;min-height:1120px;background:#fff;box-sizing:border-box;color:#000;line-height:1.6;">
+<div style="font-family:'Preeti',serif;font-size:11pt;padding:12mm 18mm 14mm 18mm;width:794px;min-height:1120px;background:#fff;box-sizing:border-box;color:#000;line-height:1.6;">
   <!-- Letterhead Header -->
-  <div style="border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px;">
+  <div style="border-bottom:2px solid #000;padding-bottom:6px;margin-bottom:10px;">
     <table style="width:100%;border-collapse:collapse;border:none;">
       <tr>
         ${
-          company.logoUrl
+          cfg.logoUrl
             ? `<td style="width:85px;vertical-align:middle;text-align:left;border:none;padding:0;">
-                <img src="${company.logoUrl}" style="width:75px;height:75px;object-fit:contain;" crossorigin="anonymous"/>
+                <img src="${cfg.logoUrl}" style="width:75px;height:75px;object-fit:contain;" crossorigin="anonymous"/>
                </td>`
             : ""
         }
         <td style="text-align:center;vertical-align:middle;border:none;padding:0;">
-          <div style="font-size:16pt;font-weight:bold;color:#111827;">${prof.nameEnglish || company.name}</div>
-          <div style="font-size:10pt;font-weight:600;margin-top:2px;">
-            ${prof.regNo ? `Reg. No. : - ${prof.regNo}` : ""} &nbsp;&nbsp;&nbsp;&nbsp; ${prof.vatNo ? `Vat. No. :- ${prof.vatNo}` : ""}
+          <div style="font-family:'Times New Roman',Arial,sans-serif;font-size:16pt;font-weight:bold;color:#000;letter-spacing:0.5px;">
+            ${cfg.nameEnglish}
           </div>
-          <div style="font-size:9.5pt;margin-top:2px;color:#374151;">
-            ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
+          <div style="font-family:'Times New Roman',Arial,sans-serif;font-size:10pt;font-weight:600;margin-top:2px;">
+            Reg. No. : - ${cfg.regNo} ${cfg.vatNo ? `&nbsp;&nbsp;&nbsp;&nbsp; Vat. No. :- ${cfg.vatNo}` : ""}
           </div>
         </td>
       </tr>
     </table>
-    <div style="margin-top:6px;display:flex;justify-content:space-between;font-size:9.5pt;font-weight:bold;">
-      <div>Ref No: - </div>
-      <div></div>
+    <div style="margin-top:4px;font-family:'Times New Roman',Arial,sans-serif;font-size:9.5pt;font-weight:bold;">
+      Ref No: -
     </div>
   </div>
 
   <!-- Heading -->
-  <div style="text-align:center;margin-bottom:10px;line-height:1.7;">
-    <div style="font-size:12pt;font-weight:bold;">${d.h1}</div>
-    <div style="font-size:10pt;">${d.h2}</div>
-    <div style="font-size:12pt;font-weight:bold;margin-top:2px;">${d.h3}</div>
+  <div style="text-align:center;margin-bottom:8px;line-height:1.7;">
+    <div style="font-size:12pt;font-weight:600;">cg';'rL– @(s)=</div>
+    <div style="font-size:10pt;">-lgod !* sf] pklgod -!_ ;Fu ;DalGwt_</div>
+    <div style="font-size:12pt;font-weight:bold;margin-top:2px;">Dff}h'bf ;"rLdf btf{ x'gsf nflu lbOg] lgj]bgsf] 9fFrf</div>
   </div>
 
   <!-- Date Right -->
-  <div style="text-align:right;font-size:11pt;margin-bottom:8px;font-weight:bold;">
-    ${d.dateL} ${activeDateEng}
+  <div style="text-align:right;font-size:11pt;margin-bottom:6px;font-weight:bold;">
+    ldlt M ${cfg.datePreeti}
   </div>
 
   <!-- Office Address -->
-  <div style="margin-bottom:10px;line-height:1.8;font-size:11pt;">
-    ${addrLines}
+  <div style="margin-bottom:8px;line-height:1.7;font-size:11pt;">
+    ${officeLines}
   </div>
 
   <!-- Subject -->
-  <div style="font-weight:bold;font-size:11.5pt;margin-bottom:8px;">
-    ${d.subj}
+  <div style="font-weight:bold;font-size:11.5pt;margin-bottom:6px;">
+    ljifoM df}h'bf ;"rLdf btf{ u/L kfpF .
   </div>
 
   <!-- Body -->
-  <div style="margin-bottom:10px;text-align:justify;line-height:1.8;font-size:10.5pt;">
-    ${d.body}
+  <div style="margin-bottom:8px;text-align:justify;line-height:1.8;font-size:10pt;">
+    ;fj{hlgs vl/b lgodfjnL, @)^$ sf] lgod !* sf] pklgod -!_ adf]lhd tklzndf plNnlvt ljj/0fcg';f/sf] k'i6\\ofOF ug]{ sfuhft ;+nUg u/L df}h'bf ;'rLdf btf{ x'g of] lgj]bg k]; u/]sf] 5' .
   </div>
 
   <!-- Tapsil -->
-  <div style="font-weight:bold;font-size:11.5pt;text-align:center;margin-bottom:6px;text-decoration:underline;">
-    ${d.tapsil}
+  <div style="font-weight:bold;font-size:11.5pt;text-align:center;margin-bottom:4px;text-decoration:underline;">
+    tfkl;n
   </div>
 
   <!-- Table -->
   <table style="width:100%;border-collapse:collapse;border:1px solid #000;font-size:10pt;line-height:1.5;">
     <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s1}
+      <td colspan="4" style="border:1px solid #000;padding:3px 5px;font-weight:bold;background:#fafafa;">
+        != df}h'bf ;'rLsf] nflu lgj]bg lbg] JolQm, ;+:yf, cfk"lt{stf{, lgdf{0f Joj;foL, k/fdz{bftf jf ;]jf k|bfossf] ljj/0f M
       </td>
     </tr>
     <tr>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${d.nameLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:32%;">${prof.nameEnglish || company.name}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:22%;">${d.addrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;width:23%;">${prof.addrEnglish || "Kathmandu, Nepal"}</td>
+      <td style="border:1px solid #000;padding:3px 5px;width:23%;">-s_ gfd M</td>
+      <td style="border:1px solid #000;padding:3px 5px;width:32%;">${cfg.namePreeti}</td>
+      <td style="border:1px solid #000;padding:3px 5px;width:22%;">-v_ 7]ufgf M</td>
+      <td style="border:1px solid #000;padding:3px 5px;width:23%;">${cfg.addrPreeti}</td>
     </tr>
     <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.corrLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.addrEnglish || "Kathmandu, Nepal"}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.contLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.contactEnglish || "Authorized Signatory"}</td>
+      <td style="border:1px solid #000;padding:3px 5px;">-u_ kqfrf/ ug]{ 7]ufgf M</td>
+      <td style="border:1px solid #000;padding:3px 5px;">${cfg.addrPreeti}</td>
+      <td style="border:1px solid #000;padding:3px 5px;">-3_ d'Vo JolQmsf] gfd M</td>
+      <td style="border:1px solid #000;padding:3px 5px;">${cfg.contactPreeti}</td>
     </tr>
     <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.phoneLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.phone}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.mobLbl}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.mobile}</td>
+      <td style="border:1px solid #000;padding:3px 5px;">-ª_ 6]lnkmf]g g+=M</td>
+      <td style="border:1px solid #000;padding:3px 5px;"></td>
+      <td style="border:1px solid #000;padding:3px 5px;">-r_ df]afOn g+= M</td>
+      <td style="border:1px solid #000;padding:3px 5px;">${cfg.mobilePreeti}</td>
     </tr>
     <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s2}
+      <td colspan="4" style="border:1px solid #000;padding:3px 5px;font-weight:bold;background:#fafafa;">
+        @= df}h'bf ;"rLdf btf{ x'gsf] nflu lgDgadf]lhdsf] k|df0fkq ;+nUg ug'{xf]nf .
       </td>
     </tr>
     <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c1} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c2} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
+      <td colspan="2" style="border:1px solid #000;padding:3px 5px;">-s_ ;+:yf jf kmd{ btf{sf] k|df0fkq 5 &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
+      <td colspan="2" style="border:1px solid #000;padding:3px 5px;">-v_ gjLs/0f ul/Psf] 5 &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
     </tr>
     <tr>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c3} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;">${d.c4} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
+      <td colspan="2" style="border:1px solid #000;padding:3px 5px;">-u_ d"No clej[l4 s/ jf :yfoL n]vf gDa/ btf{sf] k|df0fkq 5 &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
+      <td colspan="2" style="border:1px solid #000;padding:3px 5px;">-3_ s/ r'Qmfsf] k|df0fkq 5 &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
     </tr>
     <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;">${d.c5} &nbsp;&nbsp;&nbsp; <b>[ ✓ ]</b></td>
+      <td colspan="4" style="border:1px solid #000;padding:3px 5px;">-ª_ s'g vl/bsf] nflu df}h'bf ;'rLdf btf{ x'g lgj]bg lbg] xf], ;f] sfdsf] nflu Ohfht kq cfjZos kg]{ ePdf ;f]sf] k|ltlnlk 5 &nbsp;&nbsp;&nbsp; <b>[ √ ]</b></td>
     </tr>
     <tr>
-      <td colspan="4" style="border:1px solid #000;padding:4px 6px;font-weight:bold;background:#fafafa;">
-        ${d.s3}
+      <td colspan="4" style="border:1px solid #000;padding:3px 5px;font-weight:bold;background:#fafafa;">
+        #=;fj{hlgs lgsfoaf6 x'g] vl/bsf] nflu btf{ x'g rfx]sf] k|s[ltsf] ljj/0f M
       </td>
     </tr>
     <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.goods}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.const_}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
+      <td style="border:1px solid #000;padding:3px 5px;">-s_ dfn;fdfg cfk"lt{ M</td>
+      <td style="border:1px solid #000;padding:3px 5px;"></td>
+      <td style="border:1px solid #000;padding:3px 5px;">-v_ lgdf{0f sfo{</td>
+      <td style="border:1px solid #000;padding:3px 5px;"></td>
     </tr>
     <tr>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.consult}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${prof.serviceEnglish || "Consulting Services"}</td>
-      <td style="border:1px solid #000;padding:4px 6px;">${d.other}</td>
-      <td style="border:1px solid #000;padding:4px 6px;"></td>
+      <td style="border:1px solid #000;padding:3px 5px;">-u_ k/fdz{ ;]jf M</td>
+      <td style="border:1px solid #000;padding:3px 5px;">tflnd / k/fdz{ ;]jf ;DaGwL</td>
+      <td style="border:1px solid #000;padding:3px 5px;">-3_ cgo ;]jf M</td>
+      <td style="border:1px solid #000;padding:3px 5px;"></td>
     </tr>
     <tr style="height:55px;">
-      <td colspan="2" style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.dateL} ${activeDateEng}</div>
-        <div style="margin-top:6px;">${d.fyL} ${fiscalYearEnglish}</div>
+      <td colspan="2" style="border:1px solid #000;padding:3px 5px;vertical-align:top;">
+        <div>lgj]bg lbPsf] ldlt M ${cfg.datePreeti}</div>
+        <div style="margin-top:6px;">cf=j= M ${fiscalYearPreeti}</div>
       </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;text-align:center;">
-        <div>${d.stamp}</div>
+      <td style="border:1px solid #000;padding:3px 5px;vertical-align:top;text-align:center;">
+        <div>Kfmd{sf] 5fk M</div>
         ${
-          company.logoUrl
-            ? `<div style="margin-top:2px;"><img src="${company.logoUrl}" style="height:48px;width:48px;object-fit:contain;display:inline-block;" crossorigin="anonymous"/></div>`
+          cfg.stampUrl
+            ? `<div style="margin-top:2px;"><img src="${cfg.stampUrl}" style="height:50px;width:50px;object-fit:contain;display:inline-block;" crossorigin="anonymous"/></div>`
             : `<div style="height:40px;"></div>`
         }
       </td>
-      <td style="border:1px solid #000;padding:4px 6px;vertical-align:top;">
-        <div>${d.appName} ${prof.contactEnglish || "Authorized Signatory"}</div>
-        <div style="margin-top:6px;">${d.sign}</div>
+      <td style="border:1px solid #000;padding:3px 5px;vertical-align:top;">
+        <div>lgj]bssf] gfd M ${cfg.contactPreeti}</div>
+        <div style="margin-top:4px;display:flex;align-items:center;gap:4px;">
+          <span>x:tfIf/ M</span>
+          ${
+            cfg.signUrl
+              ? `<img src="${cfg.signUrl}" style="height:35px;object-fit:contain;" crossorigin="anonymous"/>`
+              : ""
+          }
+        </div>
       </td>
     </tr>
   </table>
 
   <!-- Footer -->
-  <div style="border-top:1px solid #333;margin-top:14px;padding-top:4px;text-align:center;font-size:9.5pt;color:#374151;">
-    ${prof.addrEnglish || "Kathmandu, Nepal"} ${prof.email ? ` | E-mail:- ${prof.email}` : ""} ${prof.phone || prof.mobile ? ` | Ph.:- ${prof.phone || prof.mobile}` : ""}
+  <div style="border-top:1px solid #000;margin-top:12px;padding-top:4px;text-align:center;font-family:'Times New Roman',Arial,sans-serif;font-size:9.5pt;color:#111;">
+    ${cfg.footerText}
   </div>
 </div>
 `;
@@ -871,11 +445,9 @@ export default function SuchidartaClient({
     const { default: html2canvas } = await import("html2canvas");
     const { default: jsPDF } = await import("jspdf");
 
-    if (fontMode === "preeti") {
-      try {
-        await document.fonts.load("12px Preeti");
-      } catch {}
-    }
+    try {
+      await document.fonts.load("12px Preeti");
+    } catch {}
 
     const formDiv = document.createElement("div");
     formDiv.style.cssText =
@@ -925,11 +497,16 @@ export default function SuchidartaClient({
     return pdfDataUri.split(",")[1];
   };
 
-  // Generate full PDF for single company (Page 1 + attached certificates)
+  // Build target filename
+  const getOutputFilename = (company: Company): string => {
+    const cfg = configs[company.id] || DEFAULT_COMPANIES_CONFIG[company.id] || {};
+    return `${cfg.filePrefix} ${officeName}.pdf`;
+  };
+
+  // Generate full 4-page PDF for single company
   const generateSinglePDF = async (company: Company): Promise<Blob> => {
     const page1Base64 = await renderPage1Base64(company);
-
-    const filename = `${company.name} Suchidarta ${officeKey}.pdf`;
+    const filename = getOutputFilename(company);
 
     const res = await fetch("/api/suchidarta/merge", {
       method: "POST",
@@ -959,7 +536,7 @@ export default function SuchidartaClient({
     try {
       const { saveAs } = await import("file-saver");
       const blob = await generateSinglePDF(company);
-      saveAs(blob, `${company.name} Suchidarta ${officeKey}.pdf`);
+      saveAs(blob, getOutputFilename(company));
     } catch (err) {
       console.error(err);
       alert("Error generating PDF: " + String(err));
@@ -984,12 +561,12 @@ export default function SuchidartaClient({
           `Generating ${i + 1}/${selectedList.length}: ${c.name}...`
         );
         const pdfBlob = await generateSinglePDF(c);
-        zip.file(`${c.name} Suchidarta ${officeKey}.pdf`, pdfBlob);
+        zip.file(getOutputFilename(c), pdfBlob);
       }
 
       setProgressMsg("Packing ZIP archive...");
       const zipBlob = await zip.generateAsync({ type: "blob" });
-      saveAs(zipBlob, `Suchidarta ${officeKey}.zip`);
+      saveAs(zipBlob, `Suchidarta For ${officeName}.zip`);
     } catch (err) {
       console.error(err);
       alert("Error creating ZIP: " + String(err));
@@ -1007,71 +584,37 @@ export default function SuchidartaClient({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Mode Selector */}
+      {/* Top Banner */}
       <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <span>📋</span> Suchidarta Generator (अनुसूची २(क))
+              <span>📋</span> Suchidarta Generator — {officeName}
             </h2>
             <p className="text-sm text-gray-500 mt-1">
-              Select companies, customize office & dates, and generate complete 4-page submission packets.
+              ६ वटा कम्पनीहरूका लागि १ पृष्ठ निवेदन + ३ पृष्ठ संलग्न प्रमाण-पत्र (कुल ४ पृष्ठ) एकै क्लिकमा तयार गर्नुहोस्।
             </p>
           </div>
 
-          {/* Language & Font Selector */}
-          <div className="flex items-center gap-2 bg-gray-100 p-1.5 rounded-lg border border-gray-200">
-            <span className="text-xs font-semibold text-gray-500 px-2">Font:</span>
-            <button
-              type="button"
-              onClick={() => setFontMode("preeti")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-                fontMode === "preeti"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              नेपाली (Preeti Font)
-            </button>
-            <button
-              type="button"
-              onClick={() => setFontMode("unicode")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-                fontMode === "unicode"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              नेपाली (Unicode)
-            </button>
-            <button
-              type="button"
-              onClick={() => setFontMode("english")}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-md transition ${
-                fontMode === "english"
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-200"
-              }`}
-            >
-              English (Times New Roman)
-            </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg border border-emerald-200 font-semibold flex items-center gap-1.5">
+              <span>✓</span> 6 Company Templates Ready
+            </span>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* LEFT COLUMN: Company Selection (7 cols) */}
+        {/* LEFT COLUMN: 6 Companies List with Per-Company Date inputs (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <h3 className="text-base font-semibold text-gray-900">
-                कम्पनीहरू ({selectedList.length}/{companies.length} Selected)
-              </h3>
-            </div>
+            <h3 className="text-base font-semibold text-gray-900">
+              कम्पनीहरू ({selectedList.length}/{targetCompanies.length} Selected)
+            </h3>
             <div className="flex items-center gap-2 text-xs">
               <button
                 type="button"
-                onClick={() => setSel(new Set(companies.map((c) => c.id)))}
+                onClick={() => setSel(new Set(targetCompanies.map((c) => c.id)))}
                 className="text-blue-600 hover:underline font-medium"
               >
                 Select All
@@ -1088,28 +631,21 @@ export default function SuchidartaClient({
           </div>
 
           <div className="space-y-3">
-            {companies.map((company) => {
+            {targetCompanies.map((company) => {
               const isSelected = sel.has(company.id);
-              const isExp = expandedId === company.id;
-              const prof = profiles[company.id] || {};
-              const hasReg = company.documents?.some(
-                (d) => d.sectionType.key === "registration"
-              );
-              const hasVat = company.documents?.some(
-                (d) => d.sectionType.key === "vat"
-              );
-              const latestTax = company.taxClearances?.find((t) => t.isLatest) || company.taxClearances?.[0];
+              const cfg = configs[company.id] || {};
+              const outName = getOutputFilename(company);
 
               return (
                 <div
                   key={company.id}
-                  className={`border rounded-xl transition duration-150 ${
+                  className={`border rounded-xl p-4 transition duration-150 ${
                     isSelected
                       ? "border-blue-400 bg-white shadow-sm ring-1 ring-blue-100"
                       : "border-gray-200 bg-gray-50/60 opacity-80"
                   }`}
                 >
-                  <div className="p-4 flex items-start justify-between gap-3">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <label className="flex items-start gap-3 cursor-pointer flex-1">
                       <input
                         type="checkbox"
@@ -1119,288 +655,139 @@ export default function SuchidartaClient({
                       />
                       <div>
                         <div className="font-semibold text-sm text-gray-900 flex items-center gap-2">
-                          {company.name}
-                          {company.logoUrl && (
-                            <span className="text-xs text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                              Logo/Stamp ✓
-                            </span>
-                          )}
+                          {cfg.nameEnglish || company.name}
                         </div>
-                        <div className="text-xs text-gray-500 mt-1 flex flex-wrap gap-2 items-center">
-                          <span className={hasReg ? "text-emerald-700" : "text-amber-700"}>
-                            Reg: {hasReg ? "✓ Attached" : "None"}
-                          </span>
-                          <span>•</span>
-                          <span className={hasVat ? "text-emerald-700" : "text-amber-700"}>
-                            VAT: {hasVat ? "✓ Attached" : "None"}
-                          </span>
-                          <span>•</span>
-                          <span className={latestTax ? "text-emerald-700" : "text-amber-700"}>
-                            Tax: {latestTax ? `✓ ${latestTax.fiscalYear}` : "None"}
-                          </span>
+                        <div className="text-xs text-gray-500 mt-0.5">
+                          Output: <span className="font-mono text-blue-700 font-semibold">{outName}</span>
                         </div>
-                        {prof.customDate && (
-                          <div className="text-xs text-purple-700 font-medium mt-1">
-                            📅 Custom Date: {prof.customDate}
-                          </div>
-                        )}
+                        <div className="text-xs text-emerald-700 mt-1 flex items-center gap-2">
+                          <span>✓ 1 Page Nivedan</span>
+                          <span>+</span>
+                          <span>✓ 3 Pages Attached (Reg + VAT + Tax)</span>
+                        </div>
                       </div>
                     </label>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenPreview(company)}
-                        className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2.5 py-1.5 rounded font-medium transition"
-                      >
-                        👁️ Preview
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDownloadSingle(company)}
-                        disabled={isGenerating}
-                        className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2.5 py-1.5 rounded font-medium transition"
-                      >
-                        📥 PDF
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setExpandedId(isExp ? null : company.id)}
-                        className="text-xs text-gray-500 hover:text-gray-900 px-2 py-1.5 rounded border border-gray-200"
-                      >
-                        {isExp ? "Hide ▲" : "Edit ▼"}
-                      </button>
+                    {/* Per-Company Specific Date Input */}
+                    <div className="flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
+                      <div className="text-right">
+                        <label className="block text-[11px] font-bold text-yellow-900">
+                          मिति (Date):
+                        </label>
+                        <span className="text-[10px] text-gray-500 font-serif">
+                          {cfg.datePreeti}
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        value={cfg.date || ""}
+                        onChange={(e) => updateCompanyDate(company.id, e.target.value)}
+                        placeholder="२०८१।०४।०१"
+                        className="w-28 bg-white border border-yellow-300 rounded px-2 py-1 text-xs font-semibold text-gray-900 focus:ring-1 focus:ring-yellow-500"
+                      />
                     </div>
                   </div>
 
-                  {/* Expandable Company Details Editor */}
-                  {isExp && (
-                    <div className="border-t border-gray-100 bg-gray-50/80 p-4 rounded-b-xl space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Company Name (English)
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.nameEnglish}
-                            onChange={(e) => updateProfile(company.id, "nameEnglish", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Company Name (Nepali Unicode)
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.nameUnicode}
-                            onChange={(e) => updateProfile(company.id, "nameUnicode", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Reg. No.
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.regNo}
-                            onChange={(e) => updateProfile(company.id, "regNo", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            VAT/PAN No.
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.vatNo}
-                            onChange={(e) => updateProfile(company.id, "vatNo", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Contact Person (विनोद शाह / Name)
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.contactUnicode}
-                            onChange={(e) => updateProfile(company.id, "contactUnicode", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-600 mb-1">
-                            Mobile No.
-                          </label>
-                          <input
-                            type="text"
-                            value={prof.mobile}
-                            onChange={(e) => updateProfile(company.id, "mobile", e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-2.5 py-1.5 text-xs"
-                          />
-                        </div>
-                        <div className="md:col-span-2">
-                          <label className="block text-xs font-semibold text-purple-700 mb-1 flex items-center justify-between">
-                            <span>📌 Custom Date for this Company (&quot;Farak Miti&quot;):</span>
-                            <span className="text-gray-400 font-normal">Leave blank to use master date</span>
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="e.g. २०८३/०४/०६ or 2026/07/21"
-                            value={prof.customDate || ""}
-                            onChange={(e) => updateProfile(company.id, "customDate", e.target.value)}
-                            className="w-full bg-white border border-purple-300 focus:ring-1 focus:ring-purple-400 rounded px-2.5 py-1.5 text-xs text-purple-900"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenPreview(company)}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg font-medium transition"
+                    >
+                      👁️ Preview Letter
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadSingle(company)}
+                      disabled={isGenerating}
+                      className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg font-semibold shadow-xs transition"
+                    >
+                      📥 Download 4-Page PDF
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Office, Dates & Document Controls (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          {/* Office Preset and Address */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-              <span>🏛️</span> लक्षित कार्यालय (Target Office)
-            </h3>
-
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                छिटो छान्नुहोस् (Office Preset):
-              </label>
-              <select
-                value={selectedPreset}
-                onChange={(e) => handlePresetSelect(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-              >
-                {OFFICE_PRESETS.map((p) => (
-                  <option key={p.key} value={p.key}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+        {/* RIGHT COLUMN: Common Office Block, Fiscal Year & ZIP Action (5 cols) */}
+        <div className="lg:col-span-5 space-y-5">
+          {/* Common Office Address Block (Yellow highlighted) */}
+          <div className="bg-white border-2 border-yellow-300 rounded-xl p-5 shadow-sm space-y-4 bg-yellow-50/20">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
+                <span>🏛️</span> कार्यालयको ठेगाना (सबै ६ कम्पनीलाई एउटै)
+              </h3>
+              <span className="text-[11px] bg-yellow-100 text-yellow-800 font-semibold px-2 py-0.5 rounded border border-yellow-200">
+                Dynamic
+              </span>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Office Identifier (ZIP / Filename):
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                Office Keyword (फाइलको नाममा आउने):
               </label>
               <input
                 type="text"
-                value={officeKey}
-                onChange={(e) => setOfficeKey(e.target.value)}
-                placeholder="e.g. Panchthar, Biratnagar"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono text-gray-800"
+                value={officeName}
+                onChange={(e) => setOfficeName(e.target.value)}
+                placeholder="Khotang"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold bg-white text-gray-900"
               />
+              <p className="text-[11px] text-gray-500 mt-1">
+                उदा: <span className="font-mono text-blue-600 font-semibold">BI Suchidarta For {officeName}.pdf</span>
+              </p>
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                कार्यालयको ठेगाना (Address Block):
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                कार्यालय र शाखा (Office Address Block):
               </label>
-              {fontMode === "preeti" ? (
-                <div>
-                  <textarea
-                    rows={3}
-                    value={addrText}
-                    onChange={(e) => {
-                      setAddrText(e.target.value);
-                      setAddrPreetiText(unicodeToPreeti(e.target.value));
-                    }}
-                    placeholder="श्रीमान् कार्यालय प्रमुख ज्यू, पूर्वाधार विकास कार्यालय, पाँचथर"
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                  <div className="text-xs text-gray-500 mt-1">
-                    Preeti Preview:{" "}
-                    <span style={{ fontFamily: "Preeti, serif" }} className="text-blue-700 font-semibold">
-                      {addrPreetiText || unicodeToPreeti(addrText)}
-                    </span>
-                  </div>
+              <textarea
+                rows={3}
+                value={officeUnicode}
+                onChange={(e) => handleOfficeUnicodeChange(e.target.value)}
+                placeholder="श्रीमान् डिभिजन प्रमुख ज्यू,\nखानेपानी तथा सरसफाई डिभिजन\nखोटाङ"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:ring-1 focus:ring-blue-500"
+              />
+              <div className="text-xs text-gray-500 mt-1 bg-white p-2 rounded border border-gray-200">
+                Preeti Representation:{" "}
+                <div style={{ fontFamily: "Preeti, serif" }} className="text-blue-800 font-semibold text-sm mt-0.5 whitespace-pre-line">
+                  {officePreeti}
                 </div>
-              ) : fontMode === "unicode" ? (
-                <textarea
-                  rows={3}
-                  value={addrText}
-                  onChange={(e) => setAddrText(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                />
-              ) : (
-                <textarea
-                  rows={3}
-                  value={addrEnglishText}
-                  onChange={(e) => setAddrEnglishText(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-serif"
-                />
-              )}
-            </div>
-          </div>
-
-          {/* Master Dates & Fiscal Year */}
-          <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-4">
-            <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-              <span>📅</span> मिति र आर्थिक वर्ष (Dates & Fiscal Year)
-            </h3>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  {fontMode === "english" ? "Master Date:" : "Master Miti (Date):"}
-                </label>
-                <input
-                  type="text"
-                  value={fontMode === "english" ? masterDateEnglish : masterDate}
-                  onChange={(e) =>
-                    fontMode === "english"
-                      ? setMasterDateEnglish(e.target.value)
-                      : handleMasterDateChange(e.target.value)
-                  }
-                  placeholder={fontMode === "english" ? "2026/07/20" : "२०८३/०४/०५"}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  {fontMode === "english" ? "Fiscal Year:" : "आर्थिक वर्ष (Fiscal Year):"}
-                </label>
-                <input
-                  type="text"
-                  value={fontMode === "english" ? fiscalYearEnglish : fiscalYear}
-                  onChange={(e) =>
-                    fontMode === "english"
-                      ? setFiscalYearEnglish(e.target.value)
-                      : handleFiscalYearChange(e.target.value)
-                  }
-                  placeholder={fontMode === "english" ? "2083/084" : "२०८३/०८४"}
-                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                />
               </div>
             </div>
 
-            <p className="text-xs text-gray-400">
-              💡 Harek company ko farak date chahiyo vane, left side ko company card maa &quot;Edit&quot; click garera &quot;Custom Date&quot; halna saknu hunchha!
-            </p>
+            <div>
+              <label className="block text-xs font-semibold text-gray-700 mb-1">
+                आर्थिक वर्ष (Fiscal Year):
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={fiscalYear}
+                  onChange={(e) => handleFiscalYearChange(e.target.value)}
+                  placeholder="२०८१/०८२"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold bg-white text-gray-900"
+                />
+                <span style={{ fontFamily: "Preeti, serif" }} className="text-sm font-semibold text-gray-600 whitespace-nowrap bg-gray-100 px-3 py-2 rounded-lg border border-gray-200">
+                  {fiscalYearPreeti}
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Supporting Documents to Attach */}
+          {/* Attached documents info */}
           <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm space-y-3">
             <h3 className="text-sm font-bold text-gray-900 flex items-center gap-1.5">
-              <span>📎</span> संलग्न कागजातहरू (Supporting Documents to Attach)
+              <span>📎</span> जोडिने कागजातहरू (Website Data)
             </h3>
             <p className="text-xs text-gray-500">
-              Select which certificates to automatically append after the Suchidarta application form:
+              हस्ताक्षर र छापसहितको १-पेज निवेदन पछाडि यी ३ वटा प्रमाण-पत्रहरू स्वतः जोडिनेछन्:
             </p>
 
-            <div className="space-y-2 text-sm text-gray-700">
+            <div className="space-y-2 text-xs text-gray-700">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -1408,7 +795,7 @@ export default function SuchidartaClient({
                   onChange={(e) => setAttachReg(e.target.checked)}
                   className="w-4 h-4 rounded text-blue-600"
                 />
-                <span>Page 2: Company Registration Certificate (दर्ता प्रमाणपत्र)</span>
+                <span>Page 2: Company Registration (कम्पनी रजिष्ट्रार दर्ता)</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -1418,7 +805,7 @@ export default function SuchidartaClient({
                   onChange={(e) => setAttachVat(e.target.checked)}
                   className="w-4 h-4 rounded text-blue-600"
                 />
-                <span>Page 3: VAT / PAN Certificate (स्थायी लेखा नम्बर दर्ता)</span>
+                <span>Page 3: VAT/PAN Registration (स्थायी लेखा नम्बर दर्ता)</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -1428,23 +815,22 @@ export default function SuchidartaClient({
                   onChange={(e) => setAttachTax(e.target.checked)}
                   className="w-4 h-4 rounded text-blue-600"
                 />
-                <span>Page 4: Latest Tax Clearance Certificate (कर चुक्ता प्रमाणपत्र)</span>
+                <span>Page 4: Latest Tax Clearance (कर चुक्ता प्रमाण-पत्र)</span>
               </label>
             </div>
 
-            <div className="bg-blue-50 text-blue-800 text-xs rounded-lg p-2.5 font-medium border border-blue-100">
-              📄 Total Output: 1 Page Form + {Number(attachReg) + Number(attachVat) + Number(attachTax)} Attachment Pages ={" "}
-              {1 + Number(attachReg) + Number(attachVat) + Number(attachTax)} Pages per company!
+            <div className="bg-emerald-50 text-emerald-800 text-xs rounded-lg p-2.5 font-semibold border border-emerald-200 text-center">
+              📄 Total Output = Exactly 4 Pages per Company!
             </div>
           </div>
 
-          {/* Download Action Area */}
+          {/* ZIP Download Action */}
           <div className="space-y-3">
             <button
               type="button"
               onClick={handleDownloadZip}
               disabled={isGenerating || selectedList.length === 0}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-xl shadow-md transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
             >
               {isGenerating ? (
                 <>
@@ -1474,7 +860,7 @@ export default function SuchidartaClient({
                 <>
                   <span>📦</span>
                   <span>
-                    Download All as ZIP ({selectedList.length} Companies — {officeKey})
+                    Download All as ZIP ({selectedList.length} Files — {officeName})
                   </span>
                 </>
               )}
@@ -1498,8 +884,8 @@ export default function SuchidartaClient({
                 <h3 className="font-bold text-gray-900 text-base">
                   Suchidarta Form Preview (Page 1) — {previewCompany.name}
                 </h3>
-                <p className="text-xs text-gray-500">
-                  Target Office: {officeKey} | Mode: {fontMode}
+                <p className="text-xs text-gray-500 font-mono">
+                  File: {getOutputFilename(previewCompany)}
                 </p>
               </div>
               <div className="flex items-center gap-2">
@@ -1509,7 +895,7 @@ export default function SuchidartaClient({
                   disabled={isGenerating}
                   className="bg-blue-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-blue-700 transition"
                 >
-                  📥 Download Complete PDF
+                  📥 Download 4-Page PDF
                 </button>
                 <button
                   type="button"
