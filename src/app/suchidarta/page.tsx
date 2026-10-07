@@ -9,6 +9,15 @@ export const dynamic = "force-dynamic";
 export default async function SuchidartaPage() {
   const companies = await prisma.company.findMany({
     orderBy: { name: "asc" },
+    include: {
+      documents: {
+        include: { sectionType: true },
+        where: { isDeleted: false },
+      },
+      taxClearances: {
+        where: { isDeleted: false },
+      },
+    },
   });
 
   return (
